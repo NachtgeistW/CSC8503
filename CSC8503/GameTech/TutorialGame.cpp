@@ -1,9 +1,11 @@
 #include "TutorialGame.h"
 #include "../CSC8503Common/GameWorld.h"
+#include "../CSC8503Common/Constraint.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
 #include "../../Plugins/OpenGLRendering/OGLShader.h"
 #include "../../Plugins/OpenGLRendering/OGLTexture.h"
 #include "../../Common/TextureLoader.h"
+#include "../GameTech/StateGameObject.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -12,6 +14,8 @@ TutorialGame::TutorialGame()	{
 	world		= new GameWorld();
 	renderer	= new GameTechRenderer(*world);
 	physics		= new PhysicsSystem(*world);
+
+	testStateObject = nullptr;
 
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
@@ -108,6 +112,30 @@ void TutorialGame::UpdateGame(float dt) {
 
 	Debug::FlushRenderables(dt);
 	renderer->Render();
+
+	if (testStateObject)
+		testStateObject->Update(dt);
+}
+
+StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
+{
+	auto apple = new StateGameObject();
+
+    auto volume = new SphereVolume(0.25f);
+	apple->SetBoundingVolume((CollisionVolume*)volume);
+	apple->GetTransform()
+		.SetScale(Vector3(0.25, 0.25, 0.25))
+		.SetPosition(position);
+
+	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader));
+	apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
+
+	apple->GetPhysicsObject()->SetInverseMass(1.0f);
+	apple->GetPhysicsObject()->InitSphereInertia();
+
+	world->AddGameObject(apple);
+
+	return apple;
 }
 
 void TutorialGame::UpdateKeys() {
@@ -247,11 +275,32 @@ void TutorialGame::InitWorld() {
 	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
 	InitGameExamples();
 	InitDefaultFloor();
+	BridgeConstraintTest();
+
+	testStateObject = AddStateObjectToWorld(Vector3(200, 10, 10));
 }
 
 void TutorialGame::BridgeConstraintTest() {
 
+	const auto cubeSize = Vector3(5, 5, 5);	// how heavy the middle pieces are
+	const float invCubeMass = 5;
+	constexpr int numLinks = 10;
+	constexpr float maxDistance = 30;				// constraint distance
+	constexpr float cubeDistance = 20;			// distance between links
 
+	const auto startPos = Vector3(0, 100, 100);
+	const auto start = AddCubeToWorld(startPos + Vector3(0, 0, 0), cubeSize, 0);
+	const auto end = AddCubeToWorld(startPos + Vector3((numLinks + 3) * cubeDistance, 0, 0), cubeSize, 0);
+	auto previous = start;
+	for(int i = 0; i < numLinks; ++i)
+	{
+		const auto block = AddCubeToWorld(startPos + Vector3((i + 1) * cubeDistance, 0, 0), cubeSize, invCubeMass);
+		const auto constraint = new PositionConstraint(previous, block, maxDistance);
+		world->AddConstraint(constraint);
+		previous = block;
+	}
+	const auto constraint = new PositionConstraint(previous, end, maxDistance);
+	world->AddConstraint(constraint);
 }
 
 /*

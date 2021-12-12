@@ -1,4 +1,4 @@
-#include "CollisionDetection.h"
+﻿#include "CollisionDetection.h"
 #include "CollisionVolume.h"
 #include "AABBVolume.h"
 #include "OBBVolume.h"
@@ -116,7 +116,7 @@ bool CollisionDetection::RaySphereIntersection(const Ray& r, const Transform& wo
     //Get the direction between the ray origin and the sphere origin
     const Vector3 dir = spherePos - r.GetPosition();
 
-    //Then project the sphere ��s origin onto our ray direction vector
+    //Then project the sphere ¡¯s origin onto our ray direction vector
     const float sphereProj = Vector3::Dot(dir, r.GetDirection());
 
     //point is behind the ray
@@ -299,6 +299,7 @@ Vector3	CollisionDetection::UnprojectScreenPosition(Vector3 position, float aspe
     return Vector3(transformed.x / transformed.w, transformed.y / transformed.w, transformed.z / transformed.w);
 }
 
+//object交点
 bool CollisionDetection::ObjectIntersection(GameObject* a, GameObject* b, CollisionInfo& collisionInfo) {
     const CollisionVolume* volA = a->GetBoundingVolume();
     const CollisionVolume* volB = b->GetBoundingVolume();
@@ -394,19 +395,19 @@ bool CollisionDetection::AABBIntersection(const AABBVolume& volumeA, const Trans
             maxA.z - minB.z     // distance of box 'b' to 'near' of 'a'
         };
 
-        float penetration = FLT_MAX;    //��͸
+        float penetration = FLT_MAX;    //´©Í¸
         Vector3 bestAxis;
 
         for (int i = 0; i < 6; i++)
         {
-            //���㴩͸��Сֵ
+            //¼ÆËã´©Í¸×îÐ¡Öµ
             if(distances[i] < penetration)
             {
                 penetration = distances[i];
                 bestAxis = faces[i];
             }
         }
-        //As we're checking for AABBs and we don��t want them to twist later on,
+        //As we're checking for AABBs and we don¡®t want them to twist later on,
         //we set their relative collision points both to the origin
         collisionInfo.AddContactPoint(Vector3(), Vector3(), bestAxis, penetration);
         return true;
@@ -417,15 +418,15 @@ bool CollisionDetection::AABBIntersection(const AABBVolume& volumeA, const Trans
 //Sphere / Sphere Collision
 bool CollisionDetection::SphereIntersection(const SphereVolume& volumeA, const Transform& worldTransformA,
     const SphereVolume& volumeB, const Transform& worldTransformB, CollisionInfo& collisionInfo) {
-    const float radii = volumeA.GetRadius() + volumeB.GetRadius();//�뾶
+    const float radii = volumeA.GetRadius() + volumeB.GetRadius();//°ë¾¶
     const auto delta = worldTransformB.GetPosition() - worldTransformA.GetPosition();
 
     const float deltaLength = delta.Length();
     //Collided
     if (deltaLength < radii)
     {
-        const float penetration = radii - deltaLength;//��͸�̶�
-        const auto normal = delta.Normalised();//����
+        const float penetration = radii - deltaLength;//´©Í¸³Ì¶È
+        const auto normal = delta.Normalised();//·¨Ïß
         const auto localA = normal * volumeA.GetRadius();
         const auto localB = -normal * volumeB.GetRadius();
 
@@ -447,8 +448,8 @@ bool CollisionDetection::AABBSphereIntersection(const AABBVolume& volumeA, const
     //Collided
     if (distance < volumeB.GetRadius())
     {
-        const auto collisionNormal = localPoint.Normalised();//��ײ����
-        const float penetration = volumeB.GetRadius() - distance;//��͸�̶�
+        const auto collisionNormal = localPoint.Normalised();//Åö×²·¨Ïß
+        const float penetration = volumeB.GetRadius() - distance;//´©Í¸³Ì¶È
         const auto localA = Vector3();
         const auto localB = -collisionNormal * volumeB.GetRadius();
         collisionInfo.AddContactPoint(localA, localB, collisionNormal, penetration);

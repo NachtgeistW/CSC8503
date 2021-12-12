@@ -33,8 +33,9 @@ namespace NCL {
 			void IntegrateVelocity(float dt);
 
 			void UpdateConstraints(float dt);
+            void ResolveSpringCollision(float dt);
 
-			void UpdateCollisionList();
+            void UpdateCollisionList();
 			void UpdateObjectAABBs();
 
 			void ImpulseResolveCollision(GameObject& a , GameObject&b, CollisionDetection::ContactPoint& p) const;
@@ -50,6 +51,8 @@ namespace NCL {
 
 			bool useBroadPhase		= true;
 			int numCollisionFrames	= 5;
+
+			std::set<CollisionDetection::CollisionInfo>broadphaseCollisions;
 		};
 	}
 }

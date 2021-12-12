@@ -171,11 +171,16 @@ void PhysicsSystem::UpdateCollisionList() {
 }
 
 void PhysicsSystem::UpdateObjectAABBs() {
-	gameWorld.OperateOnContents(
-		[](GameObject* g) {
-			g->UpdateBroadphaseAABB();
-		}
-	);
+	//gameWorld.OperateOnContents(
+	//	[](GameObject* g) {
+	//		g->UpdateBroadphaseAABB();
+	//	}
+	//);
+	std::vector<GameObject*>::const_iterator first;
+	std::vector<GameObject*>::const_iterator last;
+	gameWorld.GetObjectIterators(first, last);
+	for (auto i = first; i != last; ++i)
+		(*i)->UpdateBroadphaseAABB();
 }
 
 /*
@@ -273,17 +278,53 @@ compare the collisions that we absolutely need to.
 
 */
 
+//宽阶段
 void PhysicsSystem::BroadPhase() {
+	broadphaseCollisions.clear();
+	QuadTree<GameObject*>tree(Vector2(1024, 1024), 7, 6);
 
+	std::vector<GameObject*>::const_iterator first;
+	std::vector<GameObject*>::const_iterator last;
+	gameWorld.GetObjectIterators(first, last);
+	for (auto i = first; i != last; ++i)
+	{
+		Vector3 halfSizes;
+		if(!(*i)->GetBroadphaseAABB(halfSizes))
+			continue;
+		Vector3 pos = (*i)->GetTransform().GetPosition();
+		tree.Insert(*i, pos, halfSizes);
+	}
+	tree.OperateOnContents([&](std::list<QuadTreeEntry<GameObject*>>& data)
+		{
+			CollisionDetection::CollisionInfo info;
+			for (auto i = data.begin(); i != data.end(); ++i)
+			{
+				for (auto j = std::next(i); j != data.end(); ++j)
+				{
+					info.a = min((*i).object, (*j).object);
+					info.b = max((*i).object, (*j).object);
+					broadphaseCollisions.insert(info);
+				}
+			}
+		});
 }
 
 /*
-
 The broadphase will now only give us likely collisions, so we can now go through them,
 and work out if they are truly colliding, and if so, add them into the main collision list
 */
-void PhysicsSystem::NarrowPhase() {
 
+//窄阶段
+void PhysicsSystem::NarrowPhase() {
+	for (auto info : broadphaseCollisions)
+	{
+		if(CollisionDetection::ObjectIntersection(info.a, info.b, info))
+		{
+			info.framesLeft = numCollisionFrames;
+			ImpulseResolveCollision(*info.a, *info.b, info.point);
+			allCollisions.insert(info);//insert into the main set
+		}
+	}
 }
 
 /*
@@ -400,4 +441,18 @@ void PhysicsSystem::UpdateConstraints(float dt) {
 	for (auto i = first; i != last; ++i) {
 		(*i)->UpdateConstraint(dt);
 	}
+}
+
+/*
+The current ImpulseResolveCollision uses a combination of the projection and impulse methods to
+maintain the consistency of the objects in the scene. This tutorial also discussed the ideal of
+using a spring calculation to change the accelerations of the objects, rather than position or
+velocity. Try making a ResolveSpringCollision method which uses Hooke’s spring calculations to
+move the objects - remember that a spring has a resting length, and a spring coefficient to indicate
+how quickly the spring should ’snap’ back to its resting length when stretched or compressed.
+*/
+//TODO:finish it
+void PhysicsSystem::ResolveSpringCollision(float dt)
+{
+    
 }
