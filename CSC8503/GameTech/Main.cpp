@@ -10,9 +10,12 @@
 
 #include "../CSC8503Common/BehaviourAction.h"
 #include "../CSC8503Common/BehaviourSequence.h"
+#include "../CSC8503Common/PushdownState.h"
+#include "../CSC8503Common/PushdownMachine.h"
 
 using namespace NCL;
 using namespace CSC8503;
+using std::cout;
 
 void TestStateMachine()
 {
@@ -20,12 +23,12 @@ void TestStateMachine()
 	int data = 0;
     const auto A = new State([&](float dt)->void
 		{
-			std::cout << "I'm in state A!\n";
+			cout << "I'm in state A!\n";
 			data++;
 		});
     const auto B = new State([&](float dt)->void
 		{
-			std::cout << "I'm in state B!\n";
+			cout << "I'm in state B!\n";
 			data--;
 		});
 	auto stateAB = new StateTransition(A, B, [&]()->bool
@@ -83,7 +86,7 @@ void TestBehaviourTree()
 		{
 			if(state == Initialise)
 			{
-				std::cout << "Looking for a key!\n";
+				cout << "Looking for a key!\n";
 				behaviourTimer = rand() % 100;
 				state = Ongoing;
 			}
@@ -92,7 +95,7 @@ void TestBehaviourTree()
 				behaviourTimer -= dt;
 				if(behaviourTimer <= 0.0f)
 				{
-					std::cout << "Found a key!\n";
+					cout << "Found a key!\n";
 					return Success;
 				}
 			}
@@ -103,7 +106,7 @@ void TestBehaviourTree()
 		{
 			if (state == Initialise)
 			{
-				std::cout << "Going to the loot room!\n";
+				cout << "Going to the loot room!\n";
 				state = Ongoing;
 			}
 			else if (state == Ongoing)
@@ -111,7 +114,7 @@ void TestBehaviourTree()
 				distanceToTarget -= dt;
 				if (distanceToTarget <= 0.0f)
 				{
-					std::cout << "Reached room!\n";
+					cout << "Reached room!\n";
 					return Success;
 				}
 			}
@@ -122,7 +125,7 @@ void TestBehaviourTree()
 		{
 			if (state == Initialise)
 			{
-				std::cout << "Opening Door!\n";
+				cout << "Opening Door!\n";
 				return Success;
 			}
 			return state;
@@ -131,7 +134,7 @@ void TestBehaviourTree()
 		{
 			if (state == Initialise)
 			{
-				std::cout << "Looking for treasure!\n";
+				cout << "Looking for treasure!\n";
 				return Ongoing;
 			}
 			else if (state == Ongoing)
@@ -139,10 +142,10 @@ void TestBehaviourTree()
 				bool found = rand() % 2;
 				if (found)
 				{
-					std::cout << "I found some treasure!\n";
+					cout << "I found some treasure!\n";
 					return Success;
 				}
-				std::cout << "No treasure in here...\n";
+				cout << "No treasure in here...\n";
 				return Failure;
 			}
 			//will be 'ongoing' until success
@@ -152,7 +155,7 @@ void TestBehaviourTree()
 		{
 			if (state == Initialise)
 			{
-				std::cout << "Looking for Items!\n";
+				cout << "Looking for Items!\n";
 				return Ongoing;
 			}
 			else if (state == Ongoing)
@@ -160,10 +163,10 @@ void TestBehaviourTree()
 				bool found = rand() % 2;
 				if (found)
 				{
-					std::cout << "I found some items!\n";
+					cout << "I found some items!\n";
 					return Success;
 				}
-				std::cout << "No items in here...\n";
+				cout << "No items in here...\n";
 				return Failure;
 			}
 			//will be 'ongoing' until success
@@ -189,18 +192,88 @@ void TestBehaviourTree()
 		behaviourTimer = 0.0f;
 		distanceToTarget = rand() % 250;
 		BehaviourState state = Ongoing;
-		std::cout << "We're going on an adventure!\n";
+		cout << "We're going on an adventure!\n";
 		while(state == Ongoing)
 		{
 			state = rootSequence->Execute(1.0f);//fake dt
 		}
 		if (state == Success)
-			std::cout << "What a successful adventure!\n";
+			cout << "What a successful adventure!\n";
 		else if (state == Failure)
-			std::cout << "What a waste of time!\n";
+			cout << "What a waste of time!\n";
 	}
-	std::cout << "All done!\n";
+	cout << "All done!\n";
 }
+
+class PauseScreen: public PushdownState
+{
+    PushdownResult OnUpdate(float dt, PushdownState** newState) override
+    {
+		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::U))
+			return Pop;
+		return NoChange;
+    }
+	void OnAwake() override
+    {
+		cout << "Press U to unpause game!\n";
+    }
+};
+
+class GameScreen : public PushdownState
+{
+protected:
+	int coinsMined = 0;
+	float pauseReminder = 1;
+    PushdownResult OnUpdate(float dt, PushdownState** newState) override
+    {
+		pauseReminder -= dt;
+		if (pauseReminder < 0)
+		{
+			cout << "Coins mined: " << coinsMined << "\n";
+			cout << "Press P to pause game, or F1 to return to main menu!\n";
+			pauseReminder += 1.0f;
+		}
+		if(Window::GetKeyboard()->KeyDown(KeyboardKeys::P))
+		{
+			*newState = new PauseScreen();
+			return Push;
+		}
+		if(Window::GetKeyboard()->KeyDown(KeyboardKeys::F1))
+		{
+			cout << "Returning to main menu!\n";
+			return Pop;
+		}
+		if (rand() % 7 == 0)
+			coinsMined++;
+		return NoChange;
+    }
+	void OnAwake() override
+    {
+		cout << "Preparing to mine coins!\n";
+    }
+};
+
+class IntroScreen : public PushdownState
+{
+    PushdownResult OnUpdate(float dt, PushdownState** newState) override
+    {
+        if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::SPACE))
+        {
+			*newState = new GameScreen;
+			return Push;
+        }
+		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::ESCAPE))
+		{
+			return Pop;
+		}
+		return NoChange;
+    }
+	void OnAwake() override
+    {
+		cout << "Welcome to a really awesome game!\n";
+		cout << "Press SPACE to begin or ESCAPE to quit!\n";
+    }
+};
 
 /*
 
@@ -215,8 +288,9 @@ hide or show the
 
 */
 int main() {
-	TestBehaviourTree();
+	//TestBehaviourTree();
 	Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
+	TestPushdownAutomata(w);
 
 	if (!w->HasInitialised()) {
 		return -1;
@@ -233,7 +307,7 @@ int main() {
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
 		if (dt > 0.1f) {
-			std::cout << "Skipping large time delta" << std::endl;
+			cout << "Skipping large time delta" << std::endl;
 			continue; //must have hit a breakpoint or something to have a 1 second frame time!
 		}
 		if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::PRIOR)) {
