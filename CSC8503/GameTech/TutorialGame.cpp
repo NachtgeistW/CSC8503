@@ -15,7 +15,6 @@ TutorialGame::TutorialGame()	{
 	renderer	= new GameTechRenderer(*world);
 	physics		= new PhysicsSystem(*world);
 
-	testStateObject = nullptr;
 
 	forceMagnitude	= 10.0f;
 	useGravity		= false;
@@ -24,6 +23,7 @@ TutorialGame::TutorialGame()	{
 	Debug::SetRenderer(renderer);
 
 	InitialiseAssets();
+	testStateObject = nullptr;
 }
 
 /*

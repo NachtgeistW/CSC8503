@@ -1,4 +1,4 @@
-#include "NavigationGrid.h"
+﻿#include "NavigationGrid.h"
 #include "../../Common/Assets.h"
 
 #include <fstream>
@@ -77,11 +77,13 @@ NavigationGrid::~NavigationGrid()	{
 
 bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, NavigationPath& outPath) {
 	//need to work out which node 'from' sits in, and 'to' sits in
-	int fromX = ((int)from.x / nodeSize);
-	int fromZ = ((int)from.z / nodeSize);
+	//算出哪个节点等于哪个位置
+	//为此，我们可以将接收到的位置除以每个节点的大小单位 - 对 x 和 z 轴执行此操作，为每个位置获得两个整数，将其用作 GridNode 数组的索引
+	const int fromX = static_cast<int>(from.x) / nodeSize;
+	const int fromZ = static_cast<int>(from.z) / nodeSize;
 
-	int toX = ((int)to.x / nodeSize);
-	int toZ = ((int)to.z / nodeSize);
+	const int toX = static_cast<int>(to.x) / nodeSize;
+	const int toZ = static_cast<int>(to.z) / nodeSize;
 
 	if (fromX < 0 || fromX > gridWidth - 1 ||
 		fromZ < 0 || fromZ > gridHeight - 1) {
@@ -93,8 +95,8 @@ bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, Navigation
 		return false; //outside of map region!
 	}
 
-	GridNode* startNode = &allNodes[(fromZ * gridWidth) + fromX];
-	GridNode* endNode	= &allNodes[(toZ * gridWidth) + toX];
+	GridNode* startNode = &allNodes[fromZ * gridWidth + fromX];
+	GridNode* endNode	= &allNodes[toZ * gridWidth + toX];
 
 	std::vector<GridNode*>  openList;
 	std::vector<GridNode*>  closedList;
@@ -151,18 +153,18 @@ bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, Navigation
 }
 
 bool NavigationGrid::NodeInList(GridNode* n, std::vector<GridNode*>& list) const {
-	std::vector<GridNode*>::iterator i = std::find(list.begin(), list.end(), n);
+	const auto i = std::find(list.begin(), list.end(), n);
 	return i == list.end() ? false : true;
 }
 
 GridNode*  NavigationGrid::RemoveBestNode(std::vector<GridNode*>& list) const {
-	std::vector<GridNode*>::iterator bestI = list.begin();
+	auto bestI = list.begin();
 
 	GridNode* bestNode = *list.begin();
 
 	for (auto i = list.begin(); i != list.end(); ++i) {
 		if ((*i)->f < bestNode->f) {
-			bestNode	= (*i);
+			bestNode	= *i;
 			bestI		= i;
 		}
 	}
@@ -171,6 +173,7 @@ GridNode*  NavigationGrid::RemoveBestNode(std::vector<GridNode*>& list) const {
 	return bestNode;
 }
 
-float NavigationGrid::Heuristic(GridNode* hNode, GridNode* endNode) const {
+float NavigationGrid::Heuristic(const GridNode* hNode, const GridNode* endNode) const {
+	// simply use Euclidean distance to calculate
 	return (hNode->position - endNode->position).Length();
 }
