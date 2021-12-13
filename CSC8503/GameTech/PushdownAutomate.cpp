@@ -1,8 +1,8 @@
+#include "PushdownAutomate.h"
 
-
-void PushdownAutomate::TestPushdownAutomata(Window* w)
+void PushdownAutomate::TestPushdownAutomata(NCL::Window* w)
 {
-	PushdownMachine machine(new IntroScreen());
+    NCL::CSC8503::PushdownMachine machine(new IntroScreen());
 	while (w->UpdateWindow())
 	{
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();

@@ -148,9 +148,12 @@
     <ClCompile Include="TutorialGame.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BehaviourTreeManager.h" />
     <ClInclude Include="GameTechRenderer.h" />
-    <ClInclude Include="PushdownAutomate.h" />
+    <ClInclude Include="PathfindingManager.h" />
+    <ClInclude Include="PushdownAutomateManager.h" />
     <ClInclude Include="StateGameObject.h" />
+    <ClInclude Include="StateMachineManager.h" />
     <ClInclude Include="TutorialGame.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

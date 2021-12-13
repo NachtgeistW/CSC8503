@@ -41,7 +41,16 @@
     <ClInclude Include="StateGameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PushdownAutomate.h">
+    <ClInclude Include="PushdownAutomateManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PathfindingManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BehaviourTreeManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="StateMachineManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
