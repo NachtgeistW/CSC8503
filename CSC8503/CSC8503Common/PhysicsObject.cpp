@@ -33,6 +33,7 @@ void PhysicsObject::AddForce(const Vector3& addedForce) {
 }
 
 void PhysicsObject::AddForceAtPosition(const Vector3& addedForce, const Vector3& position) {
+	//TODO:transform->GetWorldPosition()?
     const Vector3 localPos = position - transform->GetPosition();
 
 	force  += addedForce;

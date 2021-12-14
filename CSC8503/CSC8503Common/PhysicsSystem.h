@@ -22,6 +22,12 @@ namespace NCL {
 			}
 
 			void SetGravity(const Vector3& g);
+
+			std::set<CollisionDetection::CollisionInfo> GetAllCollisionsInfos () const
+            {
+			    return allCollisions;
+			}
+		
 		protected:
 			void BasicCollisionDetection();
 			void BroadPhase();

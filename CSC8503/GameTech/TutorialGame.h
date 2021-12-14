@@ -13,6 +13,10 @@ namespace NCL {
 			virtual void UpdateGame(float dt);
 
 		protected:
+			float spentTime = 0;
+			bool isGameEnd = false;
+			CollisionDetection::CollisionInfo endGameInfo;
+
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
 			StateGameObject* testStateObject;
 
@@ -28,15 +32,23 @@ namespace NCL {
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
 			void InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing);
 			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
-			void InitDefaultFloor();
-			void BridgeConstraintTest();
+			void InitDefaultFloorAndWall();
+			void InitTargetBall(const Vector3& position);
+            void InitTargetControllerCube(const Vector3& position);
+            void InitTargetEnding(const Vector3& position);
+            void InitGameElements();
+            void BridgeConstraintTest();
+
+			enum WallExpandAxis { ExpandOnX, ExpandOnZ };
+			GameObject* AddWallToWorld(const Vector3& position, WallExpandAxis expandAxis) const;
 	
 			bool SelectObject();
 			void MoveSelectedObject();
-			void DebugObjectMovement();
+            void GameLogic(float dt);
+            void DebugObjectMovement();
 			void LockedObjectMovement();
 
-			GameObject* AddFloorToWorld(const Vector3& position);
+			GameObject* AddFloorToWorld(const Vector3& position) const;
 			GameObject* AddSphereToWorld(const Vector3& position, float radius, float inverseMass = 10.0f);
 			GameObject* AddCubeToWorld(const Vector3& position, Vector3 dimensions, float inverseMass = 10.0f);
 			

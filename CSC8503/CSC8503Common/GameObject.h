@@ -49,6 +49,10 @@ namespace NCL {
 				physicsObject = newObject;
 			}
 
+			void SetName(const string& n) {
+				name = n;
+			}
+
 			const string& GetName() const {
 				return name;
 			}

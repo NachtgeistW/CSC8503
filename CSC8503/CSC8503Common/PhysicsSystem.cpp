@@ -345,6 +345,7 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 	{
 		PhysicsObject* object = (*i)->GetPhysicsObject();
 		if (object == nullptr)
+			// No physics object for this GameObject !
 			continue;
 		const float inverseMass = object->GetInverseMass();
 
@@ -361,14 +362,15 @@ void PhysicsSystem::IntegrateAccel(float dt) {
 		object->SetLinearVelocity(linearVel);
 
 		//Angular stuff
-		auto torque = object->GetTorque();//Á¦¾Ø
-		auto angVel = object->GetAngularVelocity();//½ÇËÙ¶È
+		auto torque = object->GetTorque();//力矩
+		auto angVel = object->GetAngularVelocity();//角速度
 
 		//update tensor vs orientation
-
-		auto angAccel = object->GetInertiaTensor() * torque;//½Ç¼ÓËÙ¶È = ¹ßÐÔÕÅÁ¿ * Á¦¾Ø
 		object->UpdateInertiaTensor();
-		angVel += angAccel * dt;
+
+		auto angAccel = object->GetInertiaTensor() * torque;//角加速度 = 惯性张量 * 力矩
+
+	    angVel += angAccel * dt;
 		object->SetAngularVelocity(angVel);
 	}
 }
@@ -395,18 +397,18 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		Vector3 linearVel = object->GetLinearVelocity();
 		position += linearVel * dt;
 		transform.SetPosition(position);
-		//Linear DampingÏßÐÔ×èÄá
+		//Linear Damping线性阻尼
 		linearVel = linearVel * frameLinearDamping;
 		object->SetLinearVelocity(linearVel);
 
 		//Orientation Stuff
-		auto orientation = transform.GetOrientation();//·½Ïò
-		auto angVel = object->GetAngularVelocity();//½ÇËÙ¶È
+		auto orientation = transform.GetOrientation();//方向
+		auto angVel = object->GetAngularVelocity();//角速度
 
 		orientation = orientation + Quaternion(angVel * dt * 0.5f, 0.0f) * orientation;
 
 		//Damp the angular velocity
-        const float frameAngularDamping = 1.0f - 0.4f * dt;//½Ç×èÄá
+        const float frameAngularDamping = 1.0f - 0.4f * dt;//角阻尼
 		angVel = angVel * frameAngularDamping;
 		object->SetAngularVelocity(angVel);
 	}

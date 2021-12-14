@@ -1,4 +1,4 @@
-#include "TutorialGame.h"
+﻿#include "TutorialGame.h"
 #include "../CSC8503Common/GameWorld.h"
 #include "../CSC8503Common/Constraint.h"
 #include "../../Plugins/OpenGLRendering/OGLMesh.h"
@@ -52,7 +52,7 @@ void TutorialGame::InitialiseAssets() {
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
 	InitCamera();
-	InitWorld();
+	InitWorldLevel1();
 }
 
 TutorialGame::~TutorialGame()	{
@@ -71,6 +71,7 @@ TutorialGame::~TutorialGame()	{
 	delete world;
 }
 
+//Main update function
 void TutorialGame::UpdateGame(float dt) {
 	if (!inSelectionMode) {
 		world->GetMainCamera()->UpdateCamera(dt);
@@ -115,6 +116,28 @@ void TutorialGame::UpdateGame(float dt) {
 
 	if (testStateObject)
 		testStateObject->Update(dt);
+
+	GameLogicLevel1(dt);
+}
+
+void TutorialGame::GameLogicLevel1(float dt)
+{
+	if (!isGameEnd)
+	{
+		spentTime += dt;
+		renderer->DrawString("Spent Time: " + std::to_string(spentTime), Vector2(5, 15));
+	}
+	else
+		renderer->DrawString("Congratulate! Total Spent Time: " + std::to_string(spentTime), Vector2(5, 15));
+	//Judge for game ending;
+    const auto collisionsInfo = physics->GetAllCollisionsInfos();
+    for (auto& info : collisionsInfo)
+    {
+        if ((info.a == endGameInfo.a && info.b == endGameInfo.b) || (info.a == endGameInfo.b && info.b == endGameInfo.a))
+        {
+			isGameEnd = true;
+        }
+    }
 }
 
 StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
@@ -140,9 +163,11 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
 
 void TutorialGame::UpdateKeys() {
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
-		InitWorld(); //We can reset the simulation at any time with F1
+		InitWorldLevel1(); //We can reset the simulation at any time with F1
 		selectionObject = nullptr;
 		lockedObject	= nullptr;
+		isGameEnd = false;
+		spentTime = 0;
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
@@ -268,14 +293,16 @@ void TutorialGame::InitCamera() {
 	lockedObject = nullptr;
 }
 
-void TutorialGame::InitWorld() {
+void TutorialGame::InitWorldLevel1() {
 	world->ClearAndErase();
 	physics->Clear();
 
-	InitMixedGridWorld(5, 5, 3.5f, 3.5f);
-	InitGameExamples();
-	InitDefaultFloor();
-	BridgeConstraintTest();
+	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
+	
+	InitDefaultFloorAndWall();
+	InitGameElements();
+	
+    //BridgeConstraintTest();
 
 	testStateObject = AddStateObjectToWorld(Vector3(200, 10, 10));
 }
@@ -304,11 +331,40 @@ void TutorialGame::BridgeConstraintTest() {
 }
 
 /*
+A single function to add three large immoveable cube around our world
+*/
+GameObject* TutorialGame::AddWallToWorld(const Vector3& position, WallExpandAxis expandAxis) const
+{
+	const auto wall = new GameObject();
+	Vector3 wallSize;
+	if (expandAxis == ExpandOnX)
+		wallSize = Vector3(2, 15, 104);
+	else
+		wallSize = Vector3(100, 15, 2);
+	const auto volume	= new AABBVolume(wallSize);
+	wall->SetBoundingVolume(reinterpret_cast<CollisionVolume*>(volume));
+	wall->GetTransform()
+		.SetScale(wallSize * 2)
+		.SetPosition(position);
+
+	wall->SetRenderObject(new RenderObject(&wall->GetTransform(), cubeMesh, basicTex, basicShader));
+	wall->SetPhysicsObject(new PhysicsObject(&wall->GetTransform(), wall->GetBoundingVolume()));
+
+	wall->GetPhysicsObject()->SetInverseMass(0);
+	wall->GetPhysicsObject()->InitCubeInertia();
+
+	world->AddGameObject(wall);
+
+	return wall;
+}
+
+/*
 
 A single function to add a large immoveable cube to the bottom of our world
 
 */
-GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) {
+GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) const
+{
 	GameObject* floor = new GameObject();
 
 	Vector3 floorSize	= Vector3(100, 2, 100);
@@ -337,11 +393,11 @@ physics worlds. You'll probably need another function for the creation of OBB cu
 
 */
 GameObject* TutorialGame::AddSphereToWorld(const Vector3& position, float radius, float inverseMass) {
-	GameObject* sphere = new GameObject();
+    const auto sphere = new GameObject();
 
-	Vector3 sphereSize = Vector3(radius, radius, radius);
-	SphereVolume* volume = new SphereVolume(radius);
-	sphere->SetBoundingVolume((CollisionVolume*)volume);
+    const auto sphereSize = Vector3(radius, radius, radius);
+    const auto volume = new SphereVolume(radius);
+	sphere->SetBoundingVolume(reinterpret_cast<CollisionVolume*>(volume));
 
 	sphere->GetTransform()
 		.SetScale(sphereSize)
@@ -412,6 +468,7 @@ void TutorialGame::InitSphereGridWorld(int numRows, int numCols, float rowSpacin
 	AddFloorToWorld(Vector3(0, -2, 0));
 }
 
+//Initialise sample spheres and cubes
 void TutorialGame::InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing) {
 	float sphereRadius = 1.0f;
 	Vector3 cubeDims = Vector3(1, 1, 1);
@@ -439,10 +496,50 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 	}
 }
 
-void TutorialGame::InitDefaultFloor() {
+void TutorialGame::InitDefaultFloorAndWall() {
 	AddFloorToWorld(Vector3(0, -2, 0));
+	AddWallToWorld(Vector3(102, 15, 0), ExpandOnX);
+	AddWallToWorld(Vector3(-102, 15, 0), ExpandOnX);
+	AddWallToWorld(Vector3(0, 15, -102), ExpandOnZ);
+	AddWallToWorld(Vector3(0, 15, 102), ExpandOnZ);
 }
 
+//Add the ball which will be sent to the end into the world
+void TutorialGame::InitTargetBall(const Vector3& position)
+{
+	constexpr float sphereRadius = 3.0f;
+	const auto sphere = AddSphereToWorld(position, sphereRadius, 100);
+	sphere->SetName("Ball");
+	sphere->SetWorldID(100);
+	endGameInfo.a = sphere;
+}
+
+void TutorialGame::InitTargetControllerCube(const Vector3& position)
+{
+	const auto cubeSize = Vector3(5, 5, 5);	// how heavy the middle pieces are
+    const auto cube = AddCubeToWorld(position, cubeSize, 100);
+	cube->SetName("TargetControllerCube");
+	cube->SetWorldID(101);
+}
+
+void TutorialGame::InitTargetEnding(const Vector3& position)
+{
+	const auto cubeSize = Vector3(10, 10, 10);	// how heavy the middle pieces are
+	const auto ending = AddCubeToWorld(position, cubeSize, 0);
+	ending->SetName("Ending");
+	ending->SetWorldID(102);
+	endGameInfo.b = ending;
+}
+
+//Initialise game elements to the world
+void TutorialGame::InitGameElements()
+{
+	InitTargetBall(Vector3(0, 5, 0));
+	InitTargetEnding(Vector3(90, 10, -90));
+	InitTargetControllerCube(Vector3(-30, 5, 30));
+}
+
+//Initialise sample characters and bonus frisbee
 void TutorialGame::InitGameExamples() {
 	AddPlayerToWorld(Vector3(0, 5, 0));
 	AddEnemyToWorld(Vector3(5, 5, 0));

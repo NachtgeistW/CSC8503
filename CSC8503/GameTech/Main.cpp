@@ -33,8 +33,8 @@ int main() {
 	TutorialGame* g = new TutorialGame();
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 
-	auto pf = new PathfindingManager();
-	pf->TestPathfinding();
+	//auto pf = new PathfindingManager();
+	//pf->TestPathfinding();
 
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
@@ -59,7 +59,7 @@ int main() {
 
 		//TestStateMachine();
 
-		pf->DisplayPathfinding();
+		//pf->DisplayPathfinding();
 	}
 	Window::DestroyGameWindow();
 }

@@ -1,6 +1,6 @@
-#include "PushdownAutomate.h"
+#include "PushdownAutomateManager.h"
 
-void PushdownAutomate::TestPushdownAutomata(NCL::Window* w)
+void PushdownAutomateManager::TestPushdownAutomata(NCL::Window* w)
 {
     NCL::CSC8503::PushdownMachine machine(new IntroScreen());
 	while (w->UpdateWindow())
