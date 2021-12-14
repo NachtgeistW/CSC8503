@@ -25,7 +25,7 @@ namespace NCL {
 			void InitCamera();
 			void UpdateKeys();
 
-			void InitWorld();
+			void InitWorldLevel1();
 
 			void InitGameExamples();
 
@@ -44,7 +44,7 @@ namespace NCL {
 	
 			bool SelectObject();
 			void MoveSelectedObject();
-            void GameLogic(float dt);
+            void GameLogicLevel1(float dt);
             void DebugObjectMovement();
 			void LockedObjectMovement();
 

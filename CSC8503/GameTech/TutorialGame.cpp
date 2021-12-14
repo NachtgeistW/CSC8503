@@ -22,8 +22,8 @@ TutorialGame::TutorialGame()	{
 
 	Debug::SetRenderer(renderer);
 
-	InitialiseAssets();
 	testStateObject = nullptr;
+	InitialiseAssets();
 }
 
 /*
@@ -143,11 +143,11 @@ void TutorialGame::GameLogicLevel1(float dt)
 StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
 {
 	auto apple = new StateGameObject();
-
-    auto volume = new SphereVolume(0.25f);
+	float radius = 0.5f;
+    auto volume = new SphereVolume(radius);
 	apple->SetBoundingVolume((CollisionVolume*)volume);
 	apple->GetTransform()
-		.SetScale(Vector3(0.25, 0.25, 0.25))
+		.SetScale(Vector3(radius, radius, radius))
 		.SetPosition(position);
 
 	apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader));
@@ -303,8 +303,6 @@ void TutorialGame::InitWorldLevel1() {
 	InitGameElements();
 	
     //BridgeConstraintTest();
-
-	testStateObject = AddStateObjectToWorld(Vector3(200, 10, 10));
 }
 
 void TutorialGame::BridgeConstraintTest() {
@@ -537,6 +535,9 @@ void TutorialGame::InitGameElements()
 	InitTargetBall(Vector3(0, 5, 0));
 	InitTargetEnding(Vector3(90, 10, -90));
 	InitTargetControllerCube(Vector3(-30, 5, 30));
+
+	testStateObject = AddStateObjectToWorld(Vector3(20, 5, 10));
+
 }
 
 //Initialise sample characters and bonus frisbee

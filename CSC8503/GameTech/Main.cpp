@@ -1,11 +1,12 @@
 #include "../../Common/Window.h"
 #include "TutorialGame.h"
 #include "PathfindingManager.h"
+#include "../CSC8503Common/PushdownState.h"
+#include "../CSC8503Common/PushdownMachine.h"
 
 using namespace NCL;
 using namespace CSC8503;
 using std::cout;
-
 /*
 
 The main function should look pretty familar to you!
@@ -21,7 +22,7 @@ hide or show the
 int main() {
 	//TestBehaviourTree();
 	Window*w = Window::CreateGameWindow("CSC8503 Game technology!", 1280, 720);
-	//TestPushdownAutomata(w);
+    
 
 	if (!w->HasInitialised()) {
 		return -1;
@@ -56,8 +57,6 @@ int main() {
 		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
 		g->UpdateGame(dt);
-
-		//TestStateMachine();
 
 		//pf->DisplayPathfinding();
 	}
