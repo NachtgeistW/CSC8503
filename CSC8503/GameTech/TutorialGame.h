@@ -37,6 +37,7 @@ namespace NCL {
 			void InitTargetBall(const Vector3& position);
             void InitTargetControllerCube(const Vector3& position);
             void InitTargetEnding(const Vector3& position);
+            void InitBaffle(const Vector3& position);
             void InitGameElements();
             void BridgeConstraintTest();
 
