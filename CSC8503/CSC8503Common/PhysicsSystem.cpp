@@ -237,7 +237,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
     //Separate them out using projection
 	transformA.SetPosition(transformA.GetPosition() - p.normal * p.penetration * (physA->GetInverseMass() / totalMass));
-	transformB.SetPosition(transformB.GetPosition() - p.normal * p.penetration * (physB->GetInverseMass() / totalMass));
+	transformB.SetPosition(transformB.GetPosition() + p.normal * p.penetration * (physB->GetInverseMass() / totalMass));
 
 	const auto relativeA = p.localA;
 	const auto relativeB = p.localB;
@@ -328,6 +328,7 @@ void PhysicsSystem::NarrowPhase() {
 }
 
 /*
+整合加速度
 Integration of acceleration and velocity is split up, so that we can
 move objects multiple times during the course of a PhysicsUpdate,
 without worrying about repeated forces accumulating etc. 

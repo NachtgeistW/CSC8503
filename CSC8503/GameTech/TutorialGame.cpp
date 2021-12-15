@@ -128,7 +128,10 @@ void TutorialGame::GameLogicLevel1(float dt)
 		renderer->DrawString("Spent Time: " + std::to_string(spentTime), Vector2(5, 15));
 	}
 	else
-		renderer->DrawString("Congratulate! Total Spent Time: " + std::to_string(spentTime), Vector2(5, 15));
+	{
+	    renderer->DrawString("Congratulate! Total Spent Time: " + std::to_string(spentTime), Vector2(5, 15));
+	    renderer->DrawString("Your score: " + std::to_string(score), Vector2(5, 25));
+	}
 	//Judge for game ending;
     const auto collisionsInfo = physics->GetAllCollisionsInfos();
     for (auto& info : collisionsInfo)
@@ -136,6 +139,8 @@ void TutorialGame::GameLogicLevel1(float dt)
         if ((info.a == endGameInfo.a && info.b == endGameInfo.b) || (info.a == endGameInfo.b && info.b == endGameInfo.a))
         {
 			isGameEnd = true;
+			score = 1000 * (1 - spentTime / 120);
+			score = score > 0 ? score : 0;
         }
     }
 }
@@ -521,6 +526,16 @@ void TutorialGame::InitTargetControllerCube(const Vector3& position)
 }
 
 void TutorialGame::InitTargetEnding(const Vector3& position)
+{
+	const auto cubeSize = Vector3(10, 10, 10);	// how heavy the middle pieces are
+	const auto ending = AddCubeToWorld(position, cubeSize, 0);
+	ending->SetName("Ending");
+	ending->SetWorldID(102);
+	endGameInfo.b = ending;
+}
+
+//TODO:完成Constraint挡板
+void TutorialGame::InitBaffle(const Vector3& position)
 {
 	const auto cubeSize = Vector3(10, 10, 10);	// how heavy the middle pieces are
 	const auto ending = AddCubeToWorld(position, cubeSize, 0);

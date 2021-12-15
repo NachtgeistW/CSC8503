@@ -14,6 +14,7 @@ namespace NCL {
 
 		protected:
 			float spentTime = 0;
+			float score = 0;
 			bool isGameEnd = false;
 			CollisionDetection::CollisionInfo endGameInfo;
 
