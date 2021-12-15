@@ -9,10 +9,13 @@ namespace NCL {
 		public:
 			TutorialGame();
 			~TutorialGame();
+            void ResetWorld();
 
-			virtual void UpdateGame(float dt);
+            virtual void UpdateGame(float dt);
+            void InitGameBoardLevel1();
+            void InitGameBoardLevel2();
 
-			bool GetIsInMenu()const { return isInMenu; }
+            bool GetIsInMenu()const { return isInMenu; }
 			void SetIsInMenu(const bool b) { isInMenu = b; }
 			bool GetIsInLevel1() const { return isInLevel1; }
 			void SetIsInLevel1(const bool b) { isInLevel1 = b; }
@@ -20,14 +23,19 @@ namespace NCL {
 			void SetIsInLevel2(const bool b) { isInLevel2 = b; }
 			bool GetIsInPause() const { return isInPause; }
 			void SetIsInPause(const bool b) { isInPause = b; }
+			bool GetIsInEnd() const { return isInEnd; }
+			void SetIsInEnd(const bool b) { isInEnd = b; }
+			void ResetGameStatue()
+            {
+				isInMenu = true; isInLevel1 = false; isInLevel2 = false; isInPause = false; isInEnd = false;
+				isLevel1End = false; isLevel2End = false;
+            }
+			bool GetIsLevel1End() const { return isLevel1End; }
+			void SetIsLevel1End(const bool b) { isLevel1End = b; }
 
 			void InitialiseAssets();
+            void OnGameEnd();
 		protected:
-			float spentTime = 0;
-			float score = 0;
-			bool isGameEnd = false;
-			CollisionDetection::CollisionInfo endGameInfo;
-
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
 			StateGameObject* testStateObject;
 
@@ -51,7 +59,7 @@ namespace NCL {
             void InitTargetEnding(const Vector3& position);
             void InitTargetEnemyBall(const Vector3& position);
             void InitBaffle(const Vector3& position);
-            void InitGameElements();
+            void InitGameElementsLevel1();
             void InitGameElementsLevel2();
             void BridgeConstraintTest();
 
@@ -105,8 +113,17 @@ namespace NCL {
 				lockedObject = o;
 			}
 
+			//Level1 end judgement
+			float spentTime = 0;
+			float score = 0;
+			bool isLevel1End = false;
+			CollisionDetection::CollisionInfo endGameInfo;
+
+			//Level2 end judgement
+			bool isLevel2End = false;
+
 			//Pushdown Automata
-			bool isInMenu = true, isInLevel1 = false, isInLevel2 = false, isInPause = false;
+			bool isInMenu = true, isInLevel1 = false, isInLevel2 = false, isInPause = false, isInEnd = false;
         };
 	}
 }

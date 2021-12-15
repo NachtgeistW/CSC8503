@@ -37,7 +37,6 @@ int main() {
 
 	auto pf = new PathfindingManager();
 	pf->TestPathfinding();
-
 	PushdownMachine machine(new PushdownAutomateManager::IntroScreen(w, g));
 
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {

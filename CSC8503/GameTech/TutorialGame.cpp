@@ -10,7 +10,7 @@
 using namespace NCL;
 using namespace CSC8503;
 
-TutorialGame::TutorialGame()	{
+TutorialGame::TutorialGame(){
 	world		= new GameWorld();
 	renderer	= new GameTechRenderer(*world);
 	physics		= new PhysicsSystem(*world);
@@ -50,9 +50,6 @@ void TutorialGame::InitialiseAssets() {
 
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
-
-	InitCameraLevel1();
-	InitWorldLevel2();
 }
 
 TutorialGame::~TutorialGame()	{
@@ -69,6 +66,13 @@ TutorialGame::~TutorialGame()	{
 	delete physics;
 	delete renderer;
 	delete world;
+}
+
+void TutorialGame::ResetWorld()
+{
+	world = new GameWorld();
+	renderer = new GameTechRenderer(*world);
+	Debug::SetRenderer(renderer);
 }
 
 //Main update function
@@ -113,36 +117,90 @@ void TutorialGame::UpdateGame(float dt) {
 
 	Debug::FlushRenderables(dt);
 	renderer->Render();
-
+	
 	if (testStateObject)
 		testStateObject->Update(dt);
 
-	GameLogicLevel2(dt);
+	// Game logic
+	if (isInLevel1)
+		GameLogicLevel1(dt);
+    else if (isInLevel2)
+	    GameLogicLevel2(dt);
+}
+
+//Game Level1
+void TutorialGame::InitGameBoardLevel1()
+{
+	InitCameraLevel1();
+	InitWorldLevel1();
+}
+
+void TutorialGame::InitCameraLevel1() {
+	world->GetMainCamera()->SetNearPlane(0.1f);
+	world->GetMainCamera()->SetFarPlane(500.0f);
+	world->GetMainCamera()->SetPitch(-15.0f);
+	world->GetMainCamera()->SetYaw(315.0f);
+	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+	lockedObject = nullptr;
+}
+
+void TutorialGame::InitWorldLevel1() {
+	world->ClearAndErase();
+	physics->Clear();
+
+	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
+
+	InitDefaultFloorAndWall();
+	InitGameElementsLevel1();
+
+	//BridgeConstraintTest();
 }
 
 void TutorialGame::GameLogicLevel1(float dt)
 {
-	if (!isGameEnd)
+	if (!isLevel1End)
 	{
 		spentTime += dt;
 		renderer->DrawString("Spent Time: " + std::to_string(spentTime), Vector2(5, 15));
 	}
 	else
-	{
-	    renderer->DrawString("Congratulate! Total Spent Time: " + std::to_string(spentTime), Vector2(5, 15));
-	    renderer->DrawString("Your score: " + std::to_string(score), Vector2(5, 25));
-	}
+		OnGameEnd();
 	//Judge for game ending;
     const auto collisionsInfo = physics->GetAllCollisionsInfos();
     for (auto& info : collisionsInfo)
     {
         if ((info.a == endGameInfo.a && info.b == endGameInfo.b) || (info.a == endGameInfo.b && info.b == endGameInfo.a))
         {
-			isGameEnd = true;
+			isLevel1End = true;
 			score = 1000 * (1 - spentTime / 120);
 			score = score > 0 ? score : 0;
         }
     }
+}
+
+//Game Level2
+
+void TutorialGame::InitGameBoardLevel2()
+{
+	InitCameraLevel2();
+	InitWorldLevel2();
+}
+
+void TutorialGame::InitWorldLevel2() {
+	world->ClearAndErase();
+	physics->Clear();
+
+	InitDefaultFloorAndWallLevel2();
+	InitGameElementsLevel2();
+}
+
+void TutorialGame::InitCameraLevel2() {
+	world->GetMainCamera()->SetNearPlane(0.1f);
+	world->GetMainCamera()->SetFarPlane(500.0f);
+	world->GetMainCamera()->SetPitch(-90.0f);
+	world->GetMainCamera()->SetYaw(0.0f);
+	world->GetMainCamera()->SetPosition(Vector3(0, 250, 0));
+	lockedObject = nullptr;
 }
 
 void TutorialGame::GameLogicLevel2(float dt)
@@ -156,6 +214,30 @@ void TutorialGame::GameLogicLevel2(float dt)
 			InitWorldLevel2();
         }
     }
+}
+
+void TutorialGame::InitDefaultFloorAndWallLevel2() {
+	AddFloorToWorld(Vector3(0, -2, 0));
+	AddWallToWorld(Vector3(102, 15, 0), ExpandOnX);
+	AddWallToWorld(Vector3(-102, 15, 0), ExpandOnX);
+	AddWallToWorld(Vector3(0, 15, -102), ExpandOnZ);
+	AddWallToWorld(Vector3(0, 15, 102), ExpandOnZ);
+}
+
+//Initialise game elements to the world Level2
+void TutorialGame::InitGameElementsLevel2()
+{
+	InitTargetBall(Vector3(0, 5, 0));
+	InitTargetEnemyBall(Vector3(90, 5, -90));
+}
+
+void TutorialGame::OnGameEnd()
+{
+	if (isLevel1End)
+	{
+		Debug::Print("Congratulate! Total Spent Time: " + std::to_string(spentTime), Vector2(5, 35));
+		Debug::Print("Your score: " + std::to_string(score), Vector2(5, 45));
+	}
 }
 
 StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
@@ -180,11 +262,11 @@ StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
 }
 
 void TutorialGame::UpdateKeys() {
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F1)) {
-		InitWorldLevel1(); //We can reset the simulation at any time with F1
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F5)) {
+		InitWorldLevel1(); //We can reset the simulation at any time with F5
 		selectionObject = nullptr;
 		lockedObject	= nullptr;
-		isGameEnd = false;
+		isLevel1End = false;
 		spentTime = 0;
 	}
 
@@ -300,48 +382,6 @@ void TutorialGame::DebugObjectMovement() {
 		}
 	}
 
-}
-
-void TutorialGame::InitCameraLevel1() {
-	world->GetMainCamera()->SetNearPlane(0.1f);
-	world->GetMainCamera()->SetFarPlane(500.0f);
-	world->GetMainCamera()->SetPitch(-15.0f);
-	world->GetMainCamera()->SetYaw(315.0f);
-	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
-	lockedObject = nullptr;
-}
-
-void TutorialGame::InitCameraLevel2() {
-	world->GetMainCamera()->SetNearPlane(0.1f);
-	world->GetMainCamera()->SetFarPlane(500.0f);
-	world->GetMainCamera()->SetPitch(-90.0f);
-	world->GetMainCamera()->SetYaw(0.0f);
-	world->GetMainCamera()->SetPosition(Vector3(0, 250, 0));
-	lockedObject = nullptr;
-}
-
-void TutorialGame::InitWorldLevel1() {
-	world->ClearAndErase();
-	physics->Clear();
-
-	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
-	
-	InitDefaultFloorAndWall();
-	InitGameElements();
-	
-    //BridgeConstraintTest();
-}
-
-void TutorialGame::InitWorldLevel2() {
-	world->ClearAndErase();
-	physics->Clear();
-
-	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
-	
-	InitDefaultFloorAndWallLevel2();
-	InitGameElementsLevel2();
-	
-    //BridgeConstraintTest();
 }
 
 void TutorialGame::BridgeConstraintTest() {
@@ -540,15 +580,6 @@ void TutorialGame::InitDefaultFloorAndWall() {
 	AddWallToWorld(Vector3(0, 15, -102), ExpandOnZ);
 	AddWallToWorld(Vector3(0, 15, 102), ExpandOnZ);
 }
-
-void TutorialGame::InitDefaultFloorAndWallLevel2() {
-	AddFloorToWorld(Vector3(0, -2, 0));
-	AddWallToWorld(Vector3(102, 15, 0), ExpandOnX);
-	AddWallToWorld(Vector3(-102, 15, 0), ExpandOnX);
-	AddWallToWorld(Vector3(0, 15, -102), ExpandOnZ);
-	AddWallToWorld(Vector3(0, 15, 102), ExpandOnZ);
-}
-
 //Add the ball which will be sent to the end into the world
 void TutorialGame::InitTargetBall(const Vector3& position)
 {
@@ -596,20 +627,13 @@ void TutorialGame::InitBaffle(const Vector3& position)
 }
 
 //Initialise game elements to the world Level1
-void TutorialGame::InitGameElements()
+void TutorialGame::InitGameElementsLevel1()
 {
 	InitTargetBall(Vector3(0, 5, 0));
 	InitTargetEnding(Vector3(90, 10, -90));
 	InitTargetControllerCube(Vector3(-30, 5, 30));
 
 	testStateObject = AddStateObjectToWorld(Vector3(20, 5, 10));
-}
-
-//Initialise game elements to the world Level2
-void TutorialGame::InitGameElementsLevel2()
-{
-	InitTargetBall(Vector3(0, 5, 0));
-	InitTargetEnemyBall(Vector3(90, 5, -90));
 }
 
 //Initialise sample characters and bonus frisbee
@@ -773,7 +797,7 @@ line - after the third, they'll be able to twist under torque aswell.
 */
 void TutorialGame::MoveSelectedObject() {
 	// Draw debug text at 10, 20
-	renderer->DrawString("Click Force:" + std::to_string(forceMagnitude), Vector2(10, 20));
+	//renderer->DrawString("Click Force:" + std::to_string(forceMagnitude), Vector2(10, 20));
 	forceMagnitude += Window::GetMouse()->GetWheelMovement() * 100.0f;
 
 	//We don't select anything
