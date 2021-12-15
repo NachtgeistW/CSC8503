@@ -3,6 +3,7 @@
 #include "PathfindingManager.h"
 #include "../CSC8503Common/PushdownState.h"
 #include "../CSC8503Common/PushdownMachine.h"
+#include "PushdownAutomateManager.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -34,8 +35,10 @@ int main() {
 	TutorialGame* g = new TutorialGame();
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 
-	//auto pf = new PathfindingManager();
-	//pf->TestPathfinding();
+	auto pf = new PathfindingManager();
+	pf->TestPathfinding();
+
+	PushdownMachine machine(new PushdownAutomateManager::IntroScreen(w, g));
 
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();
@@ -56,9 +59,11 @@ int main() {
 
 		w->SetTitle("Gametech frame time:" + std::to_string(1000.0f * dt));
 
-		g->UpdateGame(dt);
+		/*g->UpdateGame(dt);*/
+		if (!machine.Update(dt))
+		    return -2;
 
-		//pf->DisplayPathfinding();
+		pf->DisplayPathfinding();
 	}
 	Window::DestroyGameWindow();
 }

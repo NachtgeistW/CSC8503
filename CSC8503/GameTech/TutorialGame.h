@@ -12,6 +12,16 @@ namespace NCL {
 
 			virtual void UpdateGame(float dt);
 
+			bool GetIsInMenu()const { return isInMenu; }
+			void SetIsInMenu(const bool b) { isInMenu = b; }
+			bool GetIsInLevel1() const { return isInLevel1; }
+			void SetIsInLevel1(const bool b) { isInLevel1 = b; }
+			bool GetIsInLevel2() const { return isInLevel2; }
+			void SetIsInLevel2(const bool b) { isInLevel2 = b; }
+			bool GetIsInPause() const { return isInPause; }
+			void SetIsInPause(const bool b) { isInPause = b; }
+
+			void InitialiseAssets();
 		protected:
 			float spentTime = 0;
 			float score = 0;
@@ -21,24 +31,28 @@ namespace NCL {
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
 			StateGameObject* testStateObject;
 
-			void InitialiseAssets();
 
-			void InitCamera();
-			void UpdateKeys();
+			void InitCameraLevel1();
+            void InitCameraLevel2();
+            void UpdateKeys();
 
 			void InitWorldLevel1();
+            void InitWorldLevel2();
 
-			void InitGameExamples();
+            void InitGameExamples();
 
 			void InitSphereGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, float radius);
 			void InitMixedGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing);
 			void InitCubeGridWorld(int numRows, int numCols, float rowSpacing, float colSpacing, const Vector3& cubeDims);
 			void InitDefaultFloorAndWall();
-			void InitTargetBall(const Vector3& position);
+            void InitDefaultFloorAndWallLevel2();
+            void InitTargetBall(const Vector3& position);
             void InitTargetControllerCube(const Vector3& position);
             void InitTargetEnding(const Vector3& position);
+            void InitTargetEnemyBall(const Vector3& position);
             void InitBaffle(const Vector3& position);
             void InitGameElements();
+            void InitGameElementsLevel2();
             void BridgeConstraintTest();
 
 			enum WallExpandAxis { ExpandOnX, ExpandOnZ };
@@ -47,6 +61,7 @@ namespace NCL {
 			bool SelectObject();
 			void MoveSelectedObject();
             void GameLogicLevel1(float dt);
+            void GameLogicLevel2(float dt);
             void DebugObjectMovement();
 			void LockedObjectMovement();
 
@@ -90,7 +105,9 @@ namespace NCL {
 				lockedObject = o;
 			}
 
-		};
+			//Pushdown Automata
+			bool isInMenu = true, isInLevel1 = false, isInLevel2 = false, isInPause = false;
+        };
 	}
 }
 

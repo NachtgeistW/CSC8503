@@ -51,8 +51,8 @@ void TutorialGame::InitialiseAssets() {
 	basicTex	= (OGLTexture*)TextureLoader::LoadAPITexture("checkerboard.png");
 	basicShader = new OGLShader("GameTechVert.glsl", "GameTechFrag.glsl");
 
-	InitCamera();
-	InitWorldLevel1();
+	InitCameraLevel1();
+	InitWorldLevel2();
 }
 
 TutorialGame::~TutorialGame()	{
@@ -117,7 +117,7 @@ void TutorialGame::UpdateGame(float dt) {
 	if (testStateObject)
 		testStateObject->Update(dt);
 
-	GameLogicLevel1(dt);
+	GameLogicLevel2(dt);
 }
 
 void TutorialGame::GameLogicLevel1(float dt)
@@ -141,6 +141,19 @@ void TutorialGame::GameLogicLevel1(float dt)
 			isGameEnd = true;
 			score = 1000 * (1 - spentTime / 120);
 			score = score > 0 ? score : 0;
+        }
+    }
+}
+
+void TutorialGame::GameLogicLevel2(float dt)
+{
+	//Judge for game ending;
+    const auto collisionsInfo = physics->GetAllCollisionsInfos();
+    for (auto& info : collisionsInfo)
+    {
+        if ((info.a == endGameInfo.a && info.b == endGameInfo.b) || (info.a == endGameInfo.b && info.b == endGameInfo.a))
+        {
+			InitWorldLevel2();
         }
     }
 }
@@ -176,7 +189,7 @@ void TutorialGame::UpdateKeys() {
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::F2)) {
-		InitCamera(); //F2 will reset the camera to a specific default place
+		InitCameraLevel1(); //F2 will reset the camera to a specific default place
 	}
 
 	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::G)) {
@@ -289,12 +302,21 @@ void TutorialGame::DebugObjectMovement() {
 
 }
 
-void TutorialGame::InitCamera() {
+void TutorialGame::InitCameraLevel1() {
 	world->GetMainCamera()->SetNearPlane(0.1f);
 	world->GetMainCamera()->SetFarPlane(500.0f);
 	world->GetMainCamera()->SetPitch(-15.0f);
 	world->GetMainCamera()->SetYaw(315.0f);
 	world->GetMainCamera()->SetPosition(Vector3(-60, 40, 60));
+	lockedObject = nullptr;
+}
+
+void TutorialGame::InitCameraLevel2() {
+	world->GetMainCamera()->SetNearPlane(0.1f);
+	world->GetMainCamera()->SetFarPlane(500.0f);
+	world->GetMainCamera()->SetPitch(-90.0f);
+	world->GetMainCamera()->SetYaw(0.0f);
+	world->GetMainCamera()->SetPosition(Vector3(0, 250, 0));
 	lockedObject = nullptr;
 }
 
@@ -306,6 +328,18 @@ void TutorialGame::InitWorldLevel1() {
 	
 	InitDefaultFloorAndWall();
 	InitGameElements();
+	
+    //BridgeConstraintTest();
+}
+
+void TutorialGame::InitWorldLevel2() {
+	world->ClearAndErase();
+	physics->Clear();
+
+	//InitMixedGridWorld(5, 5, 3.5f, 3.5f);
+	
+	InitDefaultFloorAndWallLevel2();
+	InitGameElementsLevel2();
 	
     //BridgeConstraintTest();
 }
@@ -507,6 +541,14 @@ void TutorialGame::InitDefaultFloorAndWall() {
 	AddWallToWorld(Vector3(0, 15, 102), ExpandOnZ);
 }
 
+void TutorialGame::InitDefaultFloorAndWallLevel2() {
+	AddFloorToWorld(Vector3(0, -2, 0));
+	AddWallToWorld(Vector3(102, 15, 0), ExpandOnX);
+	AddWallToWorld(Vector3(-102, 15, 0), ExpandOnX);
+	AddWallToWorld(Vector3(0, 15, -102), ExpandOnZ);
+	AddWallToWorld(Vector3(0, 15, 102), ExpandOnZ);
+}
+
 //Add the ball which will be sent to the end into the world
 void TutorialGame::InitTargetBall(const Vector3& position)
 {
@@ -534,6 +576,15 @@ void TutorialGame::InitTargetEnding(const Vector3& position)
 	endGameInfo.b = ending;
 }
 
+void TutorialGame::InitTargetEnemyBall(const Vector3& position)
+{
+	constexpr float sphereRadius = 3.0f;
+	const auto sphereEmery = AddSphereToWorld(position, sphereRadius, 100);
+	sphereEmery->SetName("Sphere Emery");
+	sphereEmery->SetWorldID(103);
+	endGameInfo.b = sphereEmery;
+}
+
 //TODO:完成Constraint挡板
 void TutorialGame::InitBaffle(const Vector3& position)
 {
@@ -544,7 +595,7 @@ void TutorialGame::InitBaffle(const Vector3& position)
 	endGameInfo.b = ending;
 }
 
-//Initialise game elements to the world
+//Initialise game elements to the world Level1
 void TutorialGame::InitGameElements()
 {
 	InitTargetBall(Vector3(0, 5, 0));
@@ -552,7 +603,13 @@ void TutorialGame::InitGameElements()
 	InitTargetControllerCube(Vector3(-30, 5, 30));
 
 	testStateObject = AddStateObjectToWorld(Vector3(20, 5, 10));
+}
 
+//Initialise game elements to the world Level2
+void TutorialGame::InitGameElementsLevel2()
+{
+	InitTargetBall(Vector3(0, 5, 0));
+	InitTargetEnemyBall(Vector3(90, 5, -90));
 }
 
 //Initialise sample characters and bonus frisbee
