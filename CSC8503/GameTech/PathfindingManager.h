@@ -15,7 +15,7 @@ class PathfindingManager
 {
     std::vector<NCL::Maths::Vector3> pathNodes;
 public:
-	void TestPathfinding()
+	void TestPathfinding(Vector3 startPos, Vector3 endPos)
 	{
         NCL::CSC8503::NavigationPath outPath;
         //NCL::CSC8503::NavigationGrid grid("TestGrid1.txt");
@@ -23,8 +23,6 @@ public:
         //NCL::Maths::Vector3 endPos(80, 0, 80);
 
         NCL::CSC8503::NavigationGrid grid("TestGrid2.txt");
-        NCL::Maths::Vector3 startPos(180, 5, 10);
-        NCL::Maths::Vector3 endPos(180, 0, 180);
 
 		bool found = grid.FindPath(startPos, endPos, outPath);
         NCL::Maths::Vector3 pos;

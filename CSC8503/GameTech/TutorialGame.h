@@ -36,7 +36,8 @@ namespace NCL {
 
 			void InitialiseAssets();
             void OnGameEnd();
-		protected:
+            void AiBehaviour(float dt, const vector<Vector3>& pathNodes);
+        protected:
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
 			StateGameObject* testStateObject;
 
@@ -122,11 +123,11 @@ namespace NCL {
 
 			//Level2
 			bool isLevel2End = false;
-			GameObject* targetBall;
-			GameObject* targetEnemyBall;
+			GameObject* playerBall;
+			GameObject* enemyBall;
 			PathfindingManager* PfManager;
 			int currentPfIndex, nextPfIndex;
-			Vector3 lastForce;
+			Vector3 lastPlayerPos, lastEnemyPos;
 
 			//Pushdown Automata
 			bool isInMenu = true, isInLevel1 = false, isInLevel2 = false, isInPause = false, isInEnd = false;

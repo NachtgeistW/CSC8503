@@ -204,8 +204,10 @@ void TutorialGame::InitWorldLevel2() {
     InitGameElementsLevel2();
 
     PfManager = new PathfindingManager();
-    PfManager->TestPathfinding();
-    auto pathNodes = PfManager->GetPathNodes();
+    lastEnemyPos = Vector3(180, 5, 10);
+    lastPlayerPos = Vector3(180, 0, 180);
+    PfManager->TestPathfinding(lastEnemyPos, lastPlayerPos);
+    const auto pathNodes = PfManager->GetPathNodes();
     currentPfIndex = pathNodes.size() - 1;
     nextPfIndex = currentPfIndex - 1;
 }
@@ -221,39 +223,22 @@ void TutorialGame::InitCameraLevel2() {
 
 void TutorialGame::GameLogicLevel2(float dt)
 {
-    //Print Emery Position
-    const auto emeryBallPosition = targetEnemyBall->GetTransform().GetPosition();
-    Debug::Print(
-        "Emery Ball Position: " +
-        std::to_string(static_cast<int>(emeryBallPosition.x)) + " " +
-        std::to_string(static_cast<int>(emeryBallPosition.y)) + " " +
-        std::to_string(static_cast<int>(emeryBallPosition.z)),
-        Vector2(25, 5));
-
-    //Move forward
-    const auto pathNodes = PfManager->GetPathNodes();
-    PfManager->DisplayPathfinding();
-    const auto curNode = pathNodes[currentPfIndex];
-    const auto nextNode = pathNodes[nextPfIndex];
-    const auto tempLength = (nextNode - emeryBallPosition).Length();
-    const auto curForce = (nextNode - emeryBallPosition).Normalised() * Vector3(0.1f, 0.1f, 0.1f);
-
-    Debug::Print("Current force: " +
-        std::to_string(curForce.x) + " " +
-        std::to_string(curForce.y) + " " +
-        std::to_string(curForce.z), 
+    //if player is moving
+    Debug::Print("Player Position: " +
+        std::to_string(lastPlayerPos.x) + " " +
+        std::to_string(lastPlayerPos.y) + " " +
+        std::to_string(lastPlayerPos.z),
         Vector2(25, 10));
 
-    if (tempLength < 1)
-    {
-        currentPfIndex--;
-        nextPfIndex--;
-        if (currentPfIndex < 1)
-            currentPfIndex = 1;
-        if (nextPfIndex < 0)
-            nextPfIndex = 0;
-    }
-    targetEnemyBall->GetPhysicsObject()->AddForce(curForce);
+    //if ((playerBall->GetTransform().GetPosition() - lastPlayerPos).Length() > 1)
+    //{
+    //    lastPlayerPos = playerBall->GetTransform().GetPosition();
+    //    lastEnemyPos = enemyBall->GetTransform().GetPosition();
+    //    PfManager->TestPathfinding(lastEnemyPos, lastPlayerPos);
+    //}
+    const auto pathNodes = PfManager->GetPathNodes();
+    PfManager->DisplayPathfinding();
+    AiBehaviour(dt, pathNodes);
 
     //Judge for game ending;
     const auto collisionsInfo = physics->GetAllCollisionsInfos();
@@ -297,6 +282,40 @@ void TutorialGame::OnGameEnd()
         Debug::Print("Congratulate! Total Spent Time: " + std::to_string(spentTime), Vector2(5, 35));
         Debug::Print("Your score: " + std::to_string(score), Vector2(5, 45));
     }
+}
+
+void TutorialGame::AiBehaviour(float dt, const vector<Vector3>& pathNodes)
+{
+    //Print Emery Position
+    const auto emeryBallPosition = enemyBall->GetTransform().GetPosition();
+    Debug::Print(
+        "Emery Ball Position: " +
+        std::to_string(static_cast<int>(emeryBallPosition.x)) + " " +
+        std::to_string(static_cast<int>(emeryBallPosition.y)) + " " +
+        std::to_string(static_cast<int>(emeryBallPosition.z)),
+        Vector2(25, 5));
+
+    //Move forward
+    const auto nextNode = pathNodes[nextPfIndex];
+    const auto tempLength = (nextNode - emeryBallPosition).Length();
+    const auto curForce = (nextNode - emeryBallPosition).Normalised() * Vector3(0.1f, 0.1f, 0.1f);
+
+    Debug::Print("Current force: " +
+        std::to_string(curForce.x) + " " +
+        std::to_string(curForce.y) + " " +
+        std::to_string(curForce.z),
+        Vector2(25, 15));
+
+    if (tempLength < 1)
+    {
+        currentPfIndex--;
+        nextPfIndex--;
+        if (currentPfIndex < 1)
+            currentPfIndex = 1;
+        if (nextPfIndex < 0)
+            nextPfIndex = 0;
+    }
+    enemyBall->GetPhysicsObject()->AddForce(curForce);
 }
 
 StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
@@ -639,10 +658,10 @@ void TutorialGame::InitDefaultFloorAndWall() {
 void TutorialGame::InitTargetBall(const Vector3& position)
 {
     constexpr float sphereRadius = 3.0f;
-    targetBall = AddSphereToWorld(position, sphereRadius, 100);
-    targetBall->SetName("Ball");
-    targetBall->SetWorldID(100);
-    endGameInfo.a = targetBall;
+    playerBall = AddSphereToWorld(position, sphereRadius, 100);
+    playerBall->SetName("Ball");
+    playerBall->SetWorldID(100);
+    endGameInfo.a = playerBall;
 }
 
 void TutorialGame::InitTargetControllerCube(const Vector3& position)
@@ -665,10 +684,10 @@ void TutorialGame::InitTargetEnding(const Vector3& position)
 void TutorialGame::InitTargetEnemyBall(const Vector3& position)
 {
     constexpr float sphereRadius = 3.0f;
-    targetEnemyBall = AddSphereToWorld(position, sphereRadius, 100);
-    targetEnemyBall->SetName("Sphere Emery");
-    targetEnemyBall->SetWorldID(103);
-    endGameInfo.b = targetEnemyBall;
+    enemyBall = AddSphereToWorld(position, sphereRadius, 100);
+    enemyBall->SetName("Sphere Emery");
+    enemyBall->SetWorldID(103);
+    endGameInfo.b = enemyBall;
 }
 
 //TODO:完成Constraint挡板

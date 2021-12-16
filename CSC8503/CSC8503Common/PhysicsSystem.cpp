@@ -275,6 +275,14 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
 	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
 
+	//Elasticity
+    constexpr float k = 100.0f;
+    const auto force = p.normal * p.penetration * -k;
+	if (physA->GetInverseMass() != 0.0f)
+		physA->AddForceAtPosition(-force, p.localA);
+	if (physB->GetInverseMass() != 0.0f)
+		physB->AddForceAtPosition(force, p.localB);
+
 }
 
 void PhysicsSystem::SpecialImpulseResolve(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const
