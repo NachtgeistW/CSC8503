@@ -27,9 +27,6 @@
     <ClCompile Include="StateGameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PushdownAutomate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameTechRenderer.h">
@@ -41,7 +38,7 @@
     <ClInclude Include="StateGameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PushdownAutomateManager.h">
+    <ClInclude Include="PushdownAutomataManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PathfindingManager.h">

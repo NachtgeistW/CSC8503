@@ -45,8 +45,10 @@ namespace NCL {
 			void UpdateObjectAABBs();
 
 			void ImpulseResolveCollision(GameObject& a , GameObject&b, CollisionDetection::ContactPoint& p) const;
+            void SpecialImpulseResolve(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p)
+		    const;
 
-			GameWorld& gameWorld;
+            GameWorld& gameWorld;
 
 			bool	applyGravity;
 			Vector3 gravity;

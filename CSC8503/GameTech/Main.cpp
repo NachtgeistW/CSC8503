@@ -3,7 +3,7 @@
 #include "PathfindingManager.h"
 #include "../CSC8503Common/PushdownState.h"
 #include "../CSC8503Common/PushdownMachine.h"
-#include "PushdownAutomateManager.h"
+#include "PushdownAutomataManager.h"
 
 using namespace NCL;
 using namespace CSC8503;
@@ -37,7 +37,7 @@ int main() {
 
 	auto pf = new PathfindingManager();
 	pf->TestPathfinding();
-	PushdownMachine machine(new PushdownAutomateManager::IntroScreen(w, g));
+	PushdownMachine machine(new PushdownAutomataManager::IntroScreen(w, g));
 
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
 		float dt = w->GetTimer()->GetTimeDeltaSeconds();

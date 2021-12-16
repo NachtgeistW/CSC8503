@@ -224,6 +224,13 @@ so that objects separate back out.
 
 */
 void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const {
+	//TODO:Rotate
+	//if (a.GetWorldID() == 101 && b.GetWorldID() == 100 || a.GetWorldID() == 100 && b.GetWorldID() == 101)
+	//{
+	//	SpecialImpulseResolve(a, b, p);
+	//	return;
+	//}
+
 	const auto physA = a.GetPhysicsObject();
 	const auto physB = b.GetPhysicsObject();
 	auto &transformA = a.GetTransform();
@@ -267,6 +274,21 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 
 	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
 	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
+
+}
+
+void PhysicsSystem::SpecialImpulseResolve(GameObject& a, GameObject& b, CollisionDetection::ContactPoint& p) const
+{
+    if (a.GetWorldID() == 100)
+    {
+		a.GetPhysicsObject()->ApplyLinearImpulse(Vector3(5, 0, 0));
+		a.GetPhysicsObject()->ApplyAngularImpulse(Vector3(5, 0, 0));
+    }
+	else if (b.GetWorldID() == 100)
+	{
+		b.GetPhysicsObject()->ApplyLinearImpulse(Vector3(5, 0, 0));
+		b.GetPhysicsObject()->ApplyAngularImpulse(Vector3(5, 0, 0));
+	}
 }
 
 /*

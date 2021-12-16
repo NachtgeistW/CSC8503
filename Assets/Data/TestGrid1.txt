@@ -1,12 +1,12 @@
-10//node size
-10//grid width
-10//grid height
+10
+10
+10
 xxxxxxxxxx
 x........x
 x........x
 x....xxxxx
 x........x
-xxxxx....x
+xxxxxx...x
 x......xxx
 x..xxxxxxx
 x........x

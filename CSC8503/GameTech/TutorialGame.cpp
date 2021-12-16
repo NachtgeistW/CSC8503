@@ -128,9 +128,6 @@ void TutorialGame::UpdateGame(float dt) {
 	Debug::FlushRenderables(dt);
 	renderer->Render();
 	
-	if (testStateObject)
-		testStateObject->Update(dt);
-
 	// Game logic
 	if (isInLevel1)
 		GameLogicLevel1(dt);
@@ -175,6 +172,9 @@ void TutorialGame::GameLogicLevel1(float dt)
 	}
 	else
 		OnGameEnd();
+	if (testStateObject)
+		testStateObject->Update(dt);
+
 	//Judge for game ending;
     const auto collisionsInfo = physics->GetAllCollisionsInfos();
     for (auto& info : collisionsInfo)
@@ -209,16 +209,12 @@ void TutorialGame::InitCameraLevel2() {
 	world->GetMainCamera()->SetFarPlane(500.0f);
 	world->GetMainCamera()->SetPitch(-90.0f);
 	world->GetMainCamera()->SetYaw(0.0f);
-	world->GetMainCamera()->SetPosition(Vector3(0, 250, 0));
+	world->GetMainCamera()->SetPosition(Vector3(100, 250, 100));
 	lockedObject = nullptr;
 }
 
 void TutorialGame::GameLogicLevel2(float dt)
 {
-	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::W)) {
-		
-	}
-
 	//Judge for game ending;
     const auto collisionsInfo = physics->GetAllCollisionsInfos();
     for (auto& info : collisionsInfo)
@@ -231,26 +227,24 @@ void TutorialGame::GameLogicLevel2(float dt)
 }
 
 void TutorialGame::InitDefaultFloorAndWallLevel2() {
-	AddFloorToWorld(Vector3(0, -2, 0));
-	AddWallToWorld(Vector3(102, 15, 0), Vector3(2, 15, 104));
-	AddWallToWorld(Vector3(-102, 15, 0), Vector3(2, 15, 104));
-	AddWallToWorld(Vector3(0, 15, -102), Vector3(100, 15, 2));
-	AddWallToWorld(Vector3(0, 15, 102), Vector3(100, 15, 2));
+	AddFloorToWorld(Vector3(100, -2, 100));
+	AddWallToWorld(Vector3(202, 15, 100), Vector3(2, 15, 104));
+	AddWallToWorld(Vector3(-2, 15, 100), Vector3(2, 15, 104));
+	AddWallToWorld(Vector3(100, 15, -2), Vector3(100, 15, 2));
+	AddWallToWorld(Vector3(100, 15, 202), Vector3(100, 15, 2));
 
 	//Maze wall
-	AddWallToWorld(Vector3(0, 15, 0), Vector3(100, 15, 5));
-	AddWallToWorld(Vector3(-45, 15, 53), Vector3(5, 15, 47));
-	AddWallToWorld(Vector3(60, 15, 30), Vector3(40, 15, 5));
-	AddWallToWorld(Vector3(0, 15, 50), Vector3(40, 15, 5));
-	AddWallToWorld(Vector3(80, 15, 60), Vector3(20, 15, 5));
-	AddWallToWorld(Vector3(40, 15, 70), Vector3(60, 15, 5));
+	AddWallToWorld(Vector3(20, 15, 30), Vector3(20, 15, 5));
+	AddWallToWorld(Vector3(160, 15, 70), Vector3(40, 15, 5));
+	AddWallToWorld(Vector3(100, 15, 120), Vector3(40, 15, 5));
+	AddWallToWorld(Vector3(140, 15, 170), Vector3(60, 15, 5));
 }
 
 //Initialise game elements to the world Level2
 void TutorialGame::InitGameElementsLevel2()
 {
-	InitTargetBall(Vector3(80, 5, 10));
-	InitTargetEnemyBall(Vector3(80, 5, 80));
+	InitTargetBall(Vector3(180, 5, 10));
+	InitTargetEnemyBall(Vector3(180, 5, 180));
 }
 
 void TutorialGame::OnGameEnd()
@@ -343,7 +337,7 @@ void TutorialGame::LockedObjectMovement() {
 	Vector3 charForward  = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
 	Vector3 charForward2 = lockedObject->GetTransform().GetOrientation() * Vector3(0, 0, 1);
 
-	float force = 100.0f;
+	float force = 1.0f;
 
 	if (Window::GetKeyboard()->KeyDown(KeyboardKeys::LEFT)) {
 		lockedObject->GetPhysicsObject()->AddForce(-rightAxis * force);

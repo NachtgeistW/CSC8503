@@ -39,7 +39,6 @@ namespace NCL {
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
 			StateGameObject* testStateObject;
 
-
 			void InitCameraLevel1();
             void InitCameraLevel2();
             void UpdateKeys();
@@ -124,6 +123,7 @@ namespace NCL {
 			bool isLevel2End = false;
 			GameObject* targetBall;
 			GameObject* targetEnemyBall;
+			
 
 			//Pushdown Automata
 			bool isInMenu = true, isInLevel1 = false, isInLevel2 = false, isInPause = false, isInEnd = false;
