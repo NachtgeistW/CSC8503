@@ -9,37 +9,6 @@
 class PushdownAutomateManager
 {
 public:
-	//class EndScreen : public NCL::CSC8503::PushdownState
-	//{
-	//protected:
- //       NCL::Window* window;
-	//	TutorialGame* game;
-	//public:
-	//	EndScreen(NCL::Window* w, TutorialGame* g) : PushdownState()
-	//	{
-	//		window = w;
-	//		game = g;
-	//	}
-	//	PushdownResult OnUpdate(float dt, PushdownState** newState) override
-	//	{
-	//		game->OnGameEnd();
-	//		if (NCL::Window::GetKeyboard()->KeyPressed(NCL::KeyboardKeys::F1))
-	//		{
-	//			std::cout << "Return to main menu!\n";
-	//			game->ResetGameStatue();
-	//			return Pop;
-	//		}
-	//		return NoChange;
-	//	}
-	//	void OnAwake() override
-	//	{
-	//		std::cout << "Game End! Press F1 to return to main menu!\n";
-	//	    game->SetIsInEnd(true);
-	//		if (game->GetIsInLevel1())
-	//			game->SetIsLevel1End(true);
-	//	}
-	//};
-
 	class PauseScreen : public NCL::CSC8503::PushdownState
 	{
 	protected:

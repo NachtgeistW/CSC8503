@@ -59,6 +59,14 @@ namespace NCL {
 
 			virtual void OnCollisionBegin(GameObject* otherObject) {
 				//std::cout << "OnCollisionBegin event occured!\n";
+				//TODO:Rotate
+				if (GetWorldID() == 101 || otherObject->GetWorldID() == 100)
+				{
+					if (GetWorldID() == 100)
+						GetPhysicsObject()->ApplyAngularImpulse({ 0, 50, 0 });
+					else if (otherObject->GetWorldID() == 100)
+						otherObject->GetPhysicsObject()->ApplyAngularImpulse({ 0, 50, 0 });
+				}
 			}
 
 			virtual void OnCollisionEnd(GameObject* otherObject) {

@@ -75,15 +75,15 @@ NavigationGrid::~NavigationGrid()	{
 	delete[] allNodes;
 }
 
-bool NavigationGrid::FindPath(const Vector3& from, const Vector3& to, NavigationPath& outPath) {
-	//need to work out which node 'from' sits in, and 'to' sits in
+bool NavigationGrid::FindPath(const Vector3& startPos, const Vector3& endPos, NavigationPath& outPath) {
+	//need endPos work out which node 'startPos' sits in, and 'endPos' sits in
 	//算出哪个节点等于哪个位置
 	//为此，我们可以将接收到的位置除以每个节点的大小单位 - 对 x 和 z 轴执行此操作，为每个位置获得两个整数，将其用作 GridNode 数组的索引
-	const int fromX = static_cast<int>(from.x) / nodeSize;
-	const int fromZ = static_cast<int>(from.z) / nodeSize;
+	const int fromX = static_cast<int>(startPos.x) / nodeSize;
+	const int fromZ = static_cast<int>(startPos.z) / nodeSize;
 
-	const int toX = static_cast<int>(to.x) / nodeSize;
-	const int toZ = static_cast<int>(to.z) / nodeSize;
+	const int toX = static_cast<int>(endPos.x) / nodeSize;
+	const int toZ = static_cast<int>(endPos.z) / nodeSize;
 
 	if (fromX < 0 || fromX > gridWidth - 1 ||
 		fromZ < 0 || fromZ > gridHeight - 1) {

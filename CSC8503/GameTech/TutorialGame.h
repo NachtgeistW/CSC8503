@@ -55,6 +55,7 @@ namespace NCL {
 			void InitDefaultFloorAndWall();
             void InitDefaultFloorAndWallLevel2();
             void InitTargetBall(const Vector3& position);
+			void InitOtherBall(const Vector3& position);
             void InitTargetControllerCube(const Vector3& position);
             void InitTargetEnding(const Vector3& position);
             void InitTargetEnemyBall(const Vector3& position);
@@ -64,7 +65,7 @@ namespace NCL {
             void BridgeConstraintTest();
 
 			enum WallExpandAxis { ExpandOnX, ExpandOnZ };
-			GameObject* AddWallToWorld(const Vector3& position, WallExpandAxis expandAxis) const;
+			GameObject* AddWallToWorld(const Vector3& position, const Vector3& size) const;
 	
 			bool SelectObject();
 			void MoveSelectedObject();
@@ -121,6 +122,8 @@ namespace NCL {
 
 			//Level2 end judgement
 			bool isLevel2End = false;
+			GameObject* targetBall;
+			GameObject* targetEnemyBall;
 
 			//Pushdown Automata
 			bool isInMenu = true, isInLevel1 = false, isInLevel2 = false, isInPause = false, isInEnd = false;

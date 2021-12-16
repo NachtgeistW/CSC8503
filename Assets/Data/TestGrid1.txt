@@ -1,12 +1,12 @@
-10//行
-10//列
-10//结点
+10//node size
+10//grid width
+10//grid height
 xxxxxxxxxx
 x........x
 x........x
 x....xxxxx
 x........x
-xxxxxx...x
+xxxxx....x
 x......xxx
 x..xxxxxxx
 x........x

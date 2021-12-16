@@ -72,7 +72,17 @@ void TutorialGame::ResetWorld()
 {
 	world = new GameWorld();
 	renderer = new GameTechRenderer(*world);
+	physics = new PhysicsSystem(*world);
+
+
+	forceMagnitude = 10.0f;
+	useGravity = false;
+	inSelectionMode = false;
+
 	Debug::SetRenderer(renderer);
+
+	testStateObject = nullptr;
+	InitialiseAssets();
 }
 
 //Main update function
@@ -205,6 +215,10 @@ void TutorialGame::InitCameraLevel2() {
 
 void TutorialGame::GameLogicLevel2(float dt)
 {
+	if (Window::GetKeyboard()->KeyPressed(KeyboardKeys::W)) {
+		
+	}
+
 	//Judge for game ending;
     const auto collisionsInfo = physics->GetAllCollisionsInfos();
     for (auto& info : collisionsInfo)
@@ -218,17 +232,25 @@ void TutorialGame::GameLogicLevel2(float dt)
 
 void TutorialGame::InitDefaultFloorAndWallLevel2() {
 	AddFloorToWorld(Vector3(0, -2, 0));
-	AddWallToWorld(Vector3(102, 15, 0), ExpandOnX);
-	AddWallToWorld(Vector3(-102, 15, 0), ExpandOnX);
-	AddWallToWorld(Vector3(0, 15, -102), ExpandOnZ);
-	AddWallToWorld(Vector3(0, 15, 102), ExpandOnZ);
+	AddWallToWorld(Vector3(102, 15, 0), Vector3(2, 15, 104));
+	AddWallToWorld(Vector3(-102, 15, 0), Vector3(2, 15, 104));
+	AddWallToWorld(Vector3(0, 15, -102), Vector3(100, 15, 2));
+	AddWallToWorld(Vector3(0, 15, 102), Vector3(100, 15, 2));
+
+	//Maze wall
+	AddWallToWorld(Vector3(0, 15, 0), Vector3(100, 15, 5));
+	AddWallToWorld(Vector3(-45, 15, 53), Vector3(5, 15, 47));
+	AddWallToWorld(Vector3(60, 15, 30), Vector3(40, 15, 5));
+	AddWallToWorld(Vector3(0, 15, 50), Vector3(40, 15, 5));
+	AddWallToWorld(Vector3(80, 15, 60), Vector3(20, 15, 5));
+	AddWallToWorld(Vector3(40, 15, 70), Vector3(60, 15, 5));
 }
 
 //Initialise game elements to the world Level2
 void TutorialGame::InitGameElementsLevel2()
 {
-	InitTargetBall(Vector3(0, 5, 0));
-	InitTargetEnemyBall(Vector3(90, 5, -90));
+	InitTargetBall(Vector3(80, 5, 10));
+	InitTargetEnemyBall(Vector3(80, 5, 80));
 }
 
 void TutorialGame::OnGameEnd()
@@ -410,14 +432,10 @@ void TutorialGame::BridgeConstraintTest() {
 /*
 A single function to add three large immoveable cube around our world
 */
-GameObject* TutorialGame::AddWallToWorld(const Vector3& position, WallExpandAxis expandAxis) const
+GameObject* TutorialGame::AddWallToWorld(const Vector3& position, const Vector3& size) const
 {
 	const auto wall = new GameObject();
-	Vector3 wallSize;
-	if (expandAxis == ExpandOnX)
-		wallSize = Vector3(2, 15, 104);
-	else
-		wallSize = Vector3(100, 15, 2);
+	Vector3 wallSize = size;
 	const auto volume	= new AABBVolume(wallSize);
 	wall->SetBoundingVolume(reinterpret_cast<CollisionVolume*>(volume));
 	wall->GetTransform()
@@ -429,7 +447,7 @@ GameObject* TutorialGame::AddWallToWorld(const Vector3& position, WallExpandAxis
 
 	wall->GetPhysicsObject()->SetInverseMass(0);
 	wall->GetPhysicsObject()->InitCubeInertia();
-
+	wall->SetWorldID(1);
 	world->AddGameObject(wall);
 
 	return wall;
@@ -456,7 +474,7 @@ GameObject* TutorialGame::AddFloorToWorld(const Vector3& position) const
 
 	floor->GetPhysicsObject()->SetInverseMass(0);
 	floor->GetPhysicsObject()->InitCubeInertia();
-
+	floor->SetWorldID(2);
 	world->AddGameObject(floor);
 
 	return floor;
@@ -575,19 +593,19 @@ void TutorialGame::InitCubeGridWorld(int numRows, int numCols, float rowSpacing,
 
 void TutorialGame::InitDefaultFloorAndWall() {
 	AddFloorToWorld(Vector3(0, -2, 0));
-	AddWallToWorld(Vector3(102, 15, 0), ExpandOnX);
-	AddWallToWorld(Vector3(-102, 15, 0), ExpandOnX);
-	AddWallToWorld(Vector3(0, 15, -102), ExpandOnZ);
-	AddWallToWorld(Vector3(0, 15, 102), ExpandOnZ);
+	AddWallToWorld(Vector3(102, 15, 0), Vector3(2, 15, 104));
+	AddWallToWorld(Vector3(-102, 15, 0), Vector3(2, 15, 104));
+	AddWallToWorld(Vector3(0, 15, -102), Vector3(100, 15, 2));
+	AddWallToWorld(Vector3(0, 15, 102), Vector3(100, 15, 2));
 }
 //Add the ball which will be sent to the end into the world
 void TutorialGame::InitTargetBall(const Vector3& position)
 {
 	constexpr float sphereRadius = 3.0f;
-	const auto sphere = AddSphereToWorld(position, sphereRadius, 100);
-	sphere->SetName("Ball");
-	sphere->SetWorldID(100);
-	endGameInfo.a = sphere;
+	targetBall = AddSphereToWorld(position, sphereRadius, 100);
+	targetBall->SetName("Ball");
+	targetBall->SetWorldID(100);
+	endGameInfo.a = targetBall;
 }
 
 void TutorialGame::InitTargetControllerCube(const Vector3& position)
@@ -610,10 +628,10 @@ void TutorialGame::InitTargetEnding(const Vector3& position)
 void TutorialGame::InitTargetEnemyBall(const Vector3& position)
 {
 	constexpr float sphereRadius = 3.0f;
-	const auto sphereEmery = AddSphereToWorld(position, sphereRadius, 100);
-	sphereEmery->SetName("Sphere Emery");
-	sphereEmery->SetWorldID(103);
-	endGameInfo.b = sphereEmery;
+	targetEnemyBall = AddSphereToWorld(position, sphereRadius, 100);
+	targetEnemyBall->SetName("Sphere Emery");
+	targetEnemyBall->SetWorldID(103);
+	endGameInfo.b = targetEnemyBall;
 }
 
 //TODO:完成Constraint挡板
@@ -622,8 +640,15 @@ void TutorialGame::InitBaffle(const Vector3& position)
 	const auto cubeSize = Vector3(10, 10, 10);	// how heavy the middle pieces are
 	const auto ending = AddCubeToWorld(position, cubeSize, 0);
 	ending->SetName("Ending");
-	ending->SetWorldID(102);
-	endGameInfo.b = ending;
+	ending->SetWorldID(104);
+}
+
+void TutorialGame::InitOtherBall(const Vector3& position)
+{
+	constexpr float sphereRadius = 5.0f;
+	const auto sphere = AddSphereToWorld(position, sphereRadius, 100);
+	sphere->SetName("OtherBall");
+	sphere->SetWorldID(105);
 }
 
 //Initialise game elements to the world Level1
@@ -632,7 +657,7 @@ void TutorialGame::InitGameElementsLevel1()
 	InitTargetBall(Vector3(0, 5, 0));
 	InitTargetEnding(Vector3(90, 10, -90));
 	InitTargetControllerCube(Vector3(-30, 5, 30));
-
+	InitOtherBall(Vector3(50, 5, 50));
 	testStateObject = AddStateObjectToWorld(Vector3(20, 5, 10));
 }
 
