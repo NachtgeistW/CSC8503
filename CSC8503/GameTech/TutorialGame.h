@@ -60,7 +60,9 @@ namespace NCL {
             void InitTargetControllerCube(const Vector3& position);
             void InitTargetEnding(const Vector3& position);
             void InitTargetEnemyBall(const Vector3& position);
-            void InitBaffle(const Vector3& position);
+            void InitConstraintCubeAndRotatingSphere(const Vector3& cubePos, const Vector3& rsPos);
+            GameObject* AddRotatingSphereToWorld(const Vector3& position, int radius, float dt,
+                                                 float inverseMass);
             void InitGameElementsLevel1();
             void InitGameElementsLevel2();
             void BridgeConstraintTest();

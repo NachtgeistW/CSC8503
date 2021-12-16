@@ -690,13 +690,50 @@ void TutorialGame::InitTargetEnemyBall(const Vector3& position)
     endGameInfo.b = enemyBall;
 }
 
-//TODO:完成Constraint挡板
-void TutorialGame::InitBaffle(const Vector3& position)
+void TutorialGame::InitConstraintCubeAndRotatingSphere(const Vector3& cubePos, const Vector3& rsPos)
 {
-    const auto cubeSize = Vector3(10, 10, 10);	// how heavy the middle pieces are
-    const auto ending = AddCubeToWorld(position, cubeSize, 0);
-    ending->SetName("Ending");
-    ending->SetWorldID(104);
+    const auto cubeSize = Vector3(5, 5, 5);
+    const auto rsSize = Vector3(5, 5, 5);
+    float invMassCube = 0;
+    float invMassRS = 1;
+    float loopLength = 20.0f;
+    auto startPos = cubePos;
+    auto rotatePos = rsPos;
+    const auto cube = AddCubeToWorld(cubePos, cubeSize, invMassCube);
+    const auto rsSphere = AddRotatingSphereToWorld(rsPos, 5, Window::GetTimer()->GetTimeDeltaSeconds(), 0);
+    rsSphere->GetPhysicsObject()->SetInverseMass(invMassRS);
+    rsSphere->GetPhysicsObject()->InitSphereInertia();
+    rsSphere->GetPhysicsObject()->SetLinearVelocity(Vector3(0, 0, 100));
+    rsSphere->SetName("Rotating sphere");
+    rsSphere->SetWorldID(104);
+
+    auto constraint = new PositionConstraint(cube, rsSphere, loopLength);
+    world->AddConstraint(constraint);
+}
+
+GameObject* TutorialGame::AddRotatingSphereToWorld(const Vector3& position, int radius,
+                                                   float dt, float inverseMass)
+{
+    const auto sphere = new GameObject();
+
+    const auto sphereSize = Vector3(radius, radius, radius);
+    const auto volume = new SphereVolume(radius);
+    sphere->SetBoundingVolume(reinterpret_cast<CollisionVolume*>(volume));
+
+    sphere->GetTransform()
+        .SetScale(sphereSize)
+        .SetPosition(position);
+
+    sphere->SetRenderObject(new RenderObject(&sphere->GetTransform(), sphereMesh, basicTex, basicShader));
+    sphere->SetPhysicsObject(new PhysicsObject(&sphere->GetTransform(), sphere->GetBoundingVolume()));
+
+    sphere->GetPhysicsObject()->SetInverseMass(inverseMass);
+    sphere->GetPhysicsObject()->InitSphereInertia();
+
+    sphere->GetPhysicsObject()->SetLinearVelocity(Vector3(0, 5 * dt, 0));
+    world->AddGameObject(sphere);
+
+    return sphere;
 }
 
 void TutorialGame::InitOtherBall(const Vector3& position)
@@ -714,6 +751,7 @@ void TutorialGame::InitGameElementsLevel1()
     InitTargetEnding(Vector3(90, 10, -90));
     InitTargetControllerCube(Vector3(-30, 5, 30));
     InitOtherBall(Vector3(50, 5, 50));
+    InitConstraintCubeAndRotatingSphere(Vector3(-50, 50, -50), Vector3(-50, 40, -40));
     testStateObject = AddStateObjectToWorld(Vector3(20, 5, 10));
 }
 
