@@ -44,5 +44,6 @@ public:
 	}
 
     std::vector<Vector3> GetPathNodes() { return pathNodes; }
+    void ClearPathNodes() { pathNodes.clear(); }
 };
 

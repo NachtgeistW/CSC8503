@@ -231,6 +231,7 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	//	return;
 	//}
 
+	//normal collision
 	const auto physA = a.GetPhysicsObject();
 	const auto physB = b.GetPhysicsObject();
 	auto &transformA = a.GetTransform();

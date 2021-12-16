@@ -182,8 +182,8 @@ void TutorialGame::GameLogicLevel1(float dt)
         if ((info.a == endGameInfo.a && info.b == endGameInfo.b) || (info.a == endGameInfo.b && info.b == endGameInfo.a))
         {
             isLevel1End = true;
-            score = 1000 * (1 - spentTime / 120);
-            score = score > 0 ? score : 0;
+            scoreLevel1 = 1000 * (1 - spentTime / 120);
+            scoreLevel1 = scoreLevel1 > 0 ? scoreLevel1 : 0;
         }
     }
 }
@@ -232,6 +232,7 @@ void TutorialGame::GameLogicLevel2(float dt)
 
     //if ((playerBall->GetTransform().GetPosition() - lastPlayerPos).Length() > 1)
     //{
+    //    PfManager->ClearPathNodes();
     //    lastPlayerPos = playerBall->GetTransform().GetPosition();
     //    lastEnemyPos = enemyBall->GetTransform().GetPosition();
     //    PfManager->TestPathfinding(lastEnemyPos, lastPlayerPos);
@@ -240,26 +241,40 @@ void TutorialGame::GameLogicLevel2(float dt)
     PfManager->DisplayPathfinding();
     AiBehaviour(dt, pathNodes);
 
+    //Judge for bonus collection;
+
     //Judge for game ending;
+    Debug::Print("Score: " + std::to_string(scoreLevel2), Vector2(5, 25));
     const auto collisionsInfo = physics->GetAllCollisionsInfos();
     for (auto& info : collisionsInfo)
     {
-        if ((info.a == endGameInfo.a && info.b == endGameInfo.b) || 
-            (info.a == endGameInfo.b && info.b == endGameInfo.a))
+        if (info.a == endGameInfo.a && info.b == endGameInfo.b || 
+            info.a == endGameInfo.b && info.b == endGameInfo.a)
         {
             InitWorldLevel2();
             currentPfIndex = pathNodes.size() - 1;
             nextPfIndex = currentPfIndex - 1;
         }
+        if (info.a->GetWorldID() == 100 && info.b->GetWorldID() == 202 ||
+            info.a->GetWorldID() == 202 && info.b->GetWorldID() == 100 ||
+            info.a->GetWorldID() == 100 && info.b->GetWorldID() == 203 ||
+            info.a->GetWorldID() == 203 && info.b->GetWorldID() == 100)
+        {
+            scoreLevel2 += 100;
+            if (info.a->GetWorldID() == 202 || info.b->GetWorldID() == 202)
+                bonus1->GetTransform().SetPosition(Vector3(150, -20, 10));
+            if (info.a->GetWorldID() == 203 || info.b->GetWorldID() == 203)
+                bonus2->GetTransform().SetPosition(Vector3(130, -20, 10));
+        }
     }
 }
 
 void TutorialGame::InitDefaultFloorAndWallLevel2() {
-    AddFloorToWorld(Vector3(100, -2, 100));
-    AddWallToWorld(Vector3(202, 15, 100), Vector3(2, 15, 104));
-    AddWallToWorld(Vector3(-2, 15, 100), Vector3(2, 15, 104));
-    AddWallToWorld(Vector3(100, 15, -2), Vector3(100, 15, 2));
-    AddWallToWorld(Vector3(100, 15, 202), Vector3(100, 15, 2));
+    AddFloorToWorld(Vector3(100, -7, 100));
+    AddWallToWorld(Vector3(202, 10, 100), Vector3(2, 10, 104));
+    AddWallToWorld(Vector3(-2, 10, 100), Vector3(2, 10, 104));
+    AddWallToWorld(Vector3(100, 10, -2), Vector3(100, 10, 2));
+    AddWallToWorld(Vector3(100, 10, 202), Vector3(100, 10, 2));
 
     //Maze wall
     AddWallToWorld(Vector3(20, 15, 30), Vector3(20, 15, 5));
@@ -273,6 +288,7 @@ void TutorialGame::InitGameElementsLevel2()
 {
     InitTargetBall(Vector3(180, 0, 10));
     InitTargetEnemyBall(Vector3(180, 0, 180));
+    InitBonus();
 }
 
 void TutorialGame::OnGameEnd()
@@ -280,7 +296,7 @@ void TutorialGame::OnGameEnd()
     if (isLevel1End)
     {
         Debug::Print("Congratulate! Total Spent Time: " + std::to_string(spentTime), Vector2(5, 35));
-        Debug::Print("Your score: " + std::to_string(score), Vector2(5, 45));
+        Debug::Print("Your score: " + std::to_string(scoreLevel1), Vector2(5, 45));
     }
 }
 
@@ -681,15 +697,6 @@ void TutorialGame::InitTargetEnding(const Vector3& position)
     endGameInfo.b = ending;
 }
 
-void TutorialGame::InitTargetEnemyBall(const Vector3& position)
-{
-    constexpr float sphereRadius = 3.0f;
-    enemyBall = AddSphereToWorld(position, sphereRadius, 100);
-    enemyBall->SetName("Sphere Emery");
-    enemyBall->SetWorldID(103);
-    endGameInfo.b = enemyBall;
-}
-
 void TutorialGame::InitConstraintCubeAndRotatingSphere(const Vector3& cubePos, const Vector3& rsPos)
 {
     const auto cubeSize = Vector3(5, 5, 5);
@@ -710,6 +717,28 @@ void TutorialGame::InitConstraintCubeAndRotatingSphere(const Vector3& cubePos, c
     auto constraint = new PositionConstraint(cube, rsSphere, loopLength);
     world->AddConstraint(constraint);
 }
+
+void TutorialGame::InitTargetEnemyBall(const Vector3& position)
+{
+    constexpr float sphereRadius = 3.0f;
+    enemyBall = AddSphereToWorld(position, sphereRadius, 100);
+    enemyBall->SetName("Sphere Emery");
+    enemyBall->SetWorldID(201);
+    endGameInfo.b = enemyBall;
+}
+
+void TutorialGame::InitBonus()
+{
+    bonus1 = AddBonusToWorld(Vector3(150, 0, 10));
+    bonus2 = AddBonusToWorld(Vector3(130, 0, 10));
+
+    bonus1->SetWorldID(202);
+    bonus2->SetWorldID(203);
+
+    bonus1->SetName("Bonus1");
+    bonus2->SetName("Bonus2");
+}
+
 
 GameObject* TutorialGame::AddRotatingSphereToWorld(const Vector3& position, int radius,
                                                    float dt, float inverseMass)

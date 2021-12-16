@@ -60,6 +60,7 @@ namespace NCL {
             void InitTargetControllerCube(const Vector3& position);
             void InitTargetEnding(const Vector3& position);
             void InitTargetEnemyBall(const Vector3& position);
+            void InitBonus();
             void InitConstraintCubeAndRotatingSphere(const Vector3& cubePos, const Vector3& rsPos);
             GameObject* AddRotatingSphereToWorld(const Vector3& position, int radius, float dt,
                                                  float inverseMass);
@@ -119,14 +120,16 @@ namespace NCL {
 
 			//Level1 end judgement
 			float spentTime = 0;
-			float score = 0;
+			float scoreLevel1 = 0;
 			bool isLevel1End = false;
 			CollisionDetection::CollisionInfo endGameInfo;
 
 			//Level2
+			float scoreLevel2 = 0;
 			bool isLevel2End = false;
 			GameObject* playerBall;
 			GameObject* enemyBall;
+			GameObject* bonus1, * bonus2;
 			PathfindingManager* PfManager;
 			int currentPfIndex, nextPfIndex;
 			Vector3 lastPlayerPos, lastEnemyPos;

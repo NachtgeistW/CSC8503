@@ -18,5 +18,5 @@ C:\Users\night\OneDrive\code\C++_Project\8503 Release  2021\CSC8503\CSC8503Commo
           [
               T=NCL::CSC8503::GameObject *
           ]
-C:\Users\night\OneDrive\code\C++_Project\8503 Release  2021\CSC8503\CSC8503Common\PhysicsSystem.cpp(314): message : 查看对正在编译的 类 模板 实例化“NCL::CSC8503::QuadTree<NCL::CSC8503::GameObject *>”的引用
+C:\Users\night\OneDrive\code\C++_Project\8503 Release  2021\CSC8503\CSC8503Common\PhysicsSystem.cpp(315): message : 查看对正在编译的 类 模板 实例化“NCL::CSC8503::QuadTree<NCL::CSC8503::GameObject *>”的引用
   CSC8503Common.vcxproj -> C:\Users\night\OneDrive\code\C++_Project\8503 Release  2021\Win32\Debug\CSC8503Common.lib
