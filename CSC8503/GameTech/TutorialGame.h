@@ -2,6 +2,7 @@
 #include "GameTechRenderer.h"
 #include "../CSC8503Common/PhysicsSystem.h"
 #include "../GameTech/StateGameObject.h"
+#include "PathfindingManager.h"
 
 namespace NCL {
 	namespace CSC8503 {
@@ -119,11 +120,13 @@ namespace NCL {
 			bool isLevel1End = false;
 			CollisionDetection::CollisionInfo endGameInfo;
 
-			//Level2 end judgement
+			//Level2
 			bool isLevel2End = false;
 			GameObject* targetBall;
 			GameObject* targetEnemyBall;
-			
+			PathfindingManager* PfManager;
+			int currentPfIndex, nextPfIndex;
+			Vector3 lastForce;
 
 			//Pushdown Automata
 			bool isInMenu = true, isInLevel1 = false, isInLevel2 = false, isInPause = false, isInEnd = false;

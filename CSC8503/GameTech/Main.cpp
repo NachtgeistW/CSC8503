@@ -35,8 +35,6 @@ int main() {
 	TutorialGame* g = new TutorialGame();
 	w->GetTimer()->GetTimeDeltaSeconds(); //Clear the timer so we don't get a larget first dt!
 
-	auto pf = new PathfindingManager();
-	pf->TestPathfinding();
 	PushdownMachine machine(new PushdownAutomataManager::IntroScreen(w, g));
 
 	while (w->UpdateWindow() && !Window::GetKeyboard()->KeyDown(KeyboardKeys::ESCAPE)) {
@@ -61,8 +59,6 @@ int main() {
 		/*g->UpdateGame(dt);*/
 		if (!machine.Update(dt))
 		    return -2;
-
-		pf->DisplayPathfinding();
 	}
 	Window::DestroyGameWindow();
 }
