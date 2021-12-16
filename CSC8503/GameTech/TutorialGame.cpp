@@ -695,7 +695,7 @@ void TutorialGame::InitConstraintCubeAndRotatingSphere(const Vector3& cubePos, c
     const auto cubeSize = Vector3(5, 5, 5);
     const auto rsSize = Vector3(5, 5, 5);
     float invMassCube = 0;
-    float invMassRS = 1;
+    float invMassRS = 0.1;
     float loopLength = 20.0f;
     auto startPos = cubePos;
     auto rotatePos = rsPos;
@@ -703,7 +703,7 @@ void TutorialGame::InitConstraintCubeAndRotatingSphere(const Vector3& cubePos, c
     const auto rsSphere = AddRotatingSphereToWorld(rsPos, 5, Window::GetTimer()->GetTimeDeltaSeconds(), 0);
     rsSphere->GetPhysicsObject()->SetInverseMass(invMassRS);
     rsSphere->GetPhysicsObject()->InitSphereInertia();
-    rsSphere->GetPhysicsObject()->SetLinearVelocity(Vector3(0, 0, 100));
+    rsSphere->GetPhysicsObject()->SetLinearVelocity(Vector3(0, 10000, 0) * Window::GetTimer()->GetTimeDeltaSeconds());
     rsSphere->SetName("Rotating sphere");
     rsSphere->SetWorldID(104);
 
@@ -751,7 +751,7 @@ void TutorialGame::InitGameElementsLevel1()
     InitTargetEnding(Vector3(90, 10, -90));
     InitTargetControllerCube(Vector3(-30, 5, 30));
     InitOtherBall(Vector3(50, 5, 50));
-    InitConstraintCubeAndRotatingSphere(Vector3(-50, 50, -50), Vector3(-50, 40, -40));
+    InitConstraintCubeAndRotatingSphere(Vector3(-50, 50, -50), Vector3(-50, 50, -10));
     testStateObject = AddStateObjectToWorld(Vector3(20, 5, 10));
 }
 
