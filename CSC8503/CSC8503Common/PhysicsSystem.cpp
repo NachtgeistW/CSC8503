@@ -273,8 +273,23 @@ void PhysicsSystem::ImpulseResolveCollision(GameObject& a, GameObject& b, Collis
 	physA->ApplyLinearImpulse(-fullImpulse);
 	physB->ApplyLinearImpulse(fullImpulse);
 
-	physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
-	physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
+	if(a.GetWorldID() == 100 && b.GetWorldID() == 105)
+	{
+		physA->ApplyLinearImpulse(Vector3(10,0,0));
+		physA->ApplyAngularImpulse(Vector3(6,0,6));
+		physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
+	}
+	else if(b.GetWorldID() == 100 && a.GetWorldID() == 105)
+	{
+		physB->ApplyLinearImpulse(Vector3(10, 0, 0));
+		physB->ApplyAngularImpulse( Vector3(6, 0, 6));
+		physA->ApplyAngularImpulse(Vector3::Cross(relativeA, fullImpulse));
+	}
+	else
+	{
+		physA->ApplyAngularImpulse(Vector3::Cross(relativeA, -fullImpulse));
+		physB->ApplyAngularImpulse(Vector3::Cross(relativeB, fullImpulse));
+	}
 
 	//Elasticity
     constexpr float k = 100.0f;
@@ -438,6 +453,9 @@ void PhysicsSystem::IntegrateVelocity(float dt) {
 		auto angVel = object->GetAngularVelocity();//角速度
 
 		orientation = orientation + Quaternion(angVel * dt * 0.5f, 0.0f) * orientation;
+		orientation.Normalise();
+
+		transform.SetOrientation(orientation);
 
 		//Damp the angular velocity
         const float frameAngularDamping = 1.0f - 0.4f * dt;//角阻尼

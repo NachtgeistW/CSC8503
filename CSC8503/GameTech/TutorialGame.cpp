@@ -339,21 +339,15 @@ void TutorialGame::AddRayToEnemyToWorld(StateGameObject* stateGameObject)
     //Set Four Ray
     Vector3 rayStartPosition = stateGameObject->GetTransform().GetPosition();
 
-   /* Vector3 rayDirection1 = Vector3(1, 0, 0);
-    Vector3 rayDirection2 = Vector3(-1, 0, 0);
-    Vector3 rayDirection3 = Vector3(0, 0, 1);
-    Vector3 rayDirection4 = Vector3(0, 0, -1);*/
+    auto rayDirection1 = Vector3(400, 0, 0);
+    auto rayDirection2 = Vector3(-400, 0, 0);
+    auto rayDirection3 = Vector3(0, 0, 400);
+    auto rayDirection4 = Vector3(0, 0, -400);
 
-
-    Vector3 rayDirection1 = Vector3(400, 0, 0);
-    Vector3 rayDirection2 = Vector3(-400, 0, 0);
-    Vector3 rayDirection3 = Vector3(0, 0, 400);
-    Vector3 rayDirection4 = Vector3(0, 0, -400);
-
-    Ray ray1 = Ray(rayStartPosition + rayDirection1 * 3.0f,rayDirection1);
-    Ray ray2 = Ray(rayStartPosition + rayDirection2 * 3.0f,rayDirection2);
-    Ray ray3 = Ray(rayStartPosition + rayDirection3 * 3.0f,rayDirection3);
-    Ray ray4 = Ray(rayStartPosition + rayDirection4 * 3.0f,rayDirection4);
+    auto ray1 = Ray(rayStartPosition + rayDirection1 * 3.0f,rayDirection1);
+    auto ray2 = Ray(rayStartPosition + rayDirection2 * 3.0f,rayDirection2);
+    auto ray3 = Ray(rayStartPosition + rayDirection3 * 3.0f,rayDirection3);
+    auto ray4 = Ray(rayStartPosition + rayDirection4 * 3.0f,rayDirection4);
 
     Debug::DrawLine(ray1.GetPosition(),ray1.GetDirection());
     Debug::DrawLine(ray2.GetPosition(),ray2.GetDirection());
@@ -370,10 +364,10 @@ void TutorialGame::AddRayToEnemyToWorld(StateGameObject* stateGameObject)
     world->Raycast(ray3, rayCollision3, true);
     world->Raycast(ray4, rayCollision4, true);
 
-    GameObject* objectSaw1 = (GameObject*)rayCollision1.node;
-    GameObject* objectSaw2 = (GameObject*)rayCollision1.node;
-    GameObject* objectSaw3 = (GameObject*)rayCollision1.node;
-    GameObject* objectSaw4 = (GameObject*)rayCollision1.node;
+    auto* objectSaw1 = static_cast<GameObject*>(rayCollision1.node);
+    auto* objectSaw2 = static_cast<GameObject*>(rayCollision1.node);
+    auto* objectSaw3 = static_cast<GameObject*>(rayCollision1.node);
+    auto objectSaw4 = static_cast<GameObject*>(rayCollision1.node);
 
     if ((objectSaw1 == bonus1 || objectSaw1 == bonus2 )
         ||(objectSaw2 == bonus1 || objectSaw2 == bonus2)
@@ -830,7 +824,7 @@ GameObject* TutorialGame::AddRotatingSphereToWorld(const Vector3& position, int 
 void TutorialGame::InitOtherBall(const Vector3& position)
 {
     constexpr float sphereRadius = 5.0f;
-    const auto sphere = AddSphereToWorld(position, sphereRadius, 100);
+    const auto sphere = AddSphereToWorld(position, sphereRadius, 0);
     sphere->SetName("OtherBall");
     sphere->SetWorldID(105);
 }
@@ -841,7 +835,7 @@ void TutorialGame::InitGameElementsLevel1()
     InitTargetBall(Vector3(0, 5, 0));
     InitTargetEnding(Vector3(90, 10, -90));
     InitTargetControllerCube(Vector3(-30, 5, 30));
-    InitOtherBall(Vector3(50, 5, 50));
+    InitOtherBall(Vector3(-50, 5, -50));
     InitConstraintCubeAndRotatingSphere(Vector3(-50, 50, -50), Vector3(-50, 50, -10));
     testStateObject = AddStateObjectToWorld(Vector3(20, 5, 10));
 }
