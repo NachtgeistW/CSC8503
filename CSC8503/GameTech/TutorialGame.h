@@ -3,7 +3,7 @@
 #include "../CSC8503Common/PhysicsSystem.h"
 #include "../GameTech/StateGameObject.h"
 #include "PathfindingManager.h"
-
+#include "StateAI.h"
 namespace NCL {
 	namespace CSC8503 {
 		class TutorialGame		{
@@ -37,6 +37,23 @@ namespace NCL {
 			void InitialiseAssets();
             void OnGameEnd();
             void AiBehaviour(float dt, const vector<Vector3>& pathNodes);
+
+			//New
+			
+
+			GameObject* GetPlayer()
+			{
+				return playerBall;
+			}
+
+			StateGameObject* GetEnemy()
+			{
+				return enemyBall;
+			}
+
+
+			void AddRayToEnemyToWorld(StateGameObject* stateGameObject);
+			bool enemySeeBonus;
         protected:
 			StateGameObject* AddStateObjectToWorld(const Vector3& position);
 			StateGameObject* testStateObject;
@@ -128,7 +145,7 @@ namespace NCL {
 			float scoreLevel2 = 0;
 			bool isLevel2End = false;
 			GameObject* playerBall;
-			GameObject* enemyBall;
+			StateGameObject* enemyBall;
 			GameObject* bonus1, * bonus2;
 			PathfindingManager* PfManager;
 			int currentPfIndex, nextPfIndex;

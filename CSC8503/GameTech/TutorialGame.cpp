@@ -15,7 +15,6 @@ TutorialGame::TutorialGame() {
     renderer = new GameTechRenderer(*world);
     physics = new PhysicsSystem(*world);
 
-
     forceMagnitude = 10.0f;
     useGravity = false;
     inSelectionMode = false;
@@ -223,27 +222,23 @@ void TutorialGame::InitCameraLevel2() {
 
 void TutorialGame::GameLogicLevel2(float dt)
 {
-    //if player is moving
-    Debug::Print("Player Position: " +
-        std::to_string(lastPlayerPos.x) + " " +
-        std::to_string(lastPlayerPos.y) + " " +
-        std::to_string(lastPlayerPos.z),
-        Vector2(25, 10));
-
     //if ((playerBall->GetTransform().GetPosition() - lastPlayerPos).Length() > 1)
     //{
     //    PfManager->ClearPathNodes();
     //    lastPlayerPos = playerBall->GetTransform().GetPosition();
     //    lastEnemyPos = enemyBall->GetTransform().GetPosition();
     //    PfManager->TestPathfinding(lastEnemyPos, lastPlayerPos);
+    //    nextPfIndex = PfManager->GetPathNodes().size() - 2;
     //}
+
     const auto pathNodes = PfManager->GetPathNodes();
     PfManager->DisplayPathfinding();
     AiBehaviour(dt, pathNodes);
 
-    //Judge for bonus collection;
+    AddRayToEnemyToWorld(enemyBall);
+    StateAI(enemyBall,bonus1,enemySeeBonus);
 
-    //Judge for game ending;
+    //Judge for game ending and bonus collection;;
     Debug::Print("Score: " + std::to_string(scoreLevel2), Vector2(5, 25));
     const auto collisionsInfo = physics->GetAllCollisionsInfos();
     for (auto& info : collisionsInfo)
@@ -304,25 +299,29 @@ void TutorialGame::AiBehaviour(float dt, const vector<Vector3>& pathNodes)
 {
     //Print Emery Position
     const auto emeryBallPosition = enemyBall->GetTransform().GetPosition();
-    Debug::Print(
-        "Emery Ball Position: " +
-        std::to_string(static_cast<int>(emeryBallPosition.x)) + " " +
-        std::to_string(static_cast<int>(emeryBallPosition.y)) + " " +
-        std::to_string(static_cast<int>(emeryBallPosition.z)),
-        Vector2(25, 5));
 
     //Move forward
     const auto nextNode = pathNodes[nextPfIndex];
     const auto tempLength = (nextNode - emeryBallPosition).Length();
-    const auto curForce = (nextNode - emeryBallPosition).Normalised() * Vector3(0.1f, 0.1f, 0.1f);
+    const auto curForce = (nextNode - emeryBallPosition).Normalised() * Vector3(10.0f, 10.0f, 10.0f);
 
-    Debug::Print("Current force: " +
+    if (Window::GetKeyboard()->KeyDown(KeyboardKeys::F3))
+    {
+        Debug::Print("Current force: " +
         std::to_string(curForce.x) + " " +
         std::to_string(curForce.y) + " " +
         std::to_string(curForce.z),
         Vector2(25, 15));
 
-    if (tempLength < 1)
+        Debug::Print(
+        "Emery Ball Position: " +
+        std::to_string(static_cast<int>(emeryBallPosition.x)) + " " +
+        std::to_string(static_cast<int>(emeryBallPosition.y)) + " " +
+        std::to_string(static_cast<int>(emeryBallPosition.z)),
+        Vector2(25, 5));
+}
+
+    if (tempLength < 2)
     {
         currentPfIndex--;
         nextPfIndex--;
@@ -334,17 +333,69 @@ void TutorialGame::AiBehaviour(float dt, const vector<Vector3>& pathNodes)
     enemyBall->GetPhysicsObject()->AddForce(curForce);
 }
 
+void TutorialGame::AddRayToEnemyToWorld(StateGameObject* stateGameObject)
+{
+    //StateGameObject is Enemy!!!
+    //Set Four Ray
+    Vector3 rayStartPosition = stateGameObject->GetTransform().GetPosition();
+
+   /* Vector3 rayDirection1 = Vector3(1, 0, 0);
+    Vector3 rayDirection2 = Vector3(-1, 0, 0);
+    Vector3 rayDirection3 = Vector3(0, 0, 1);
+    Vector3 rayDirection4 = Vector3(0, 0, -1);*/
+
+
+    Vector3 rayDirection1 = Vector3(400, 0, 0);
+    Vector3 rayDirection2 = Vector3(-400, 0, 0);
+    Vector3 rayDirection3 = Vector3(0, 0, 400);
+    Vector3 rayDirection4 = Vector3(0, 0, -400);
+
+    Ray ray1 = Ray(rayStartPosition + rayDirection1 * 3.0f,rayDirection1);
+    Ray ray2 = Ray(rayStartPosition + rayDirection2 * 3.0f,rayDirection2);
+    Ray ray3 = Ray(rayStartPosition + rayDirection3 * 3.0f,rayDirection3);
+    Ray ray4 = Ray(rayStartPosition + rayDirection4 * 3.0f,rayDirection4);
+
+    Debug::DrawLine(ray1.GetPosition(),ray1.GetDirection());
+    Debug::DrawLine(ray2.GetPosition(),ray2.GetDirection());
+    Debug::DrawLine(ray3.GetPosition(),ray3.GetDirection());
+    Debug::DrawLine(ray4.GetPosition(),ray4.GetDirection());
+
+    RayCollision rayCollision1;
+    RayCollision rayCollision2;
+    RayCollision rayCollision3;
+    RayCollision rayCollision4;
+
+    world->Raycast(ray1, rayCollision1,true);
+    world->Raycast(ray2, rayCollision2, true);
+    world->Raycast(ray3, rayCollision3, true);
+    world->Raycast(ray4, rayCollision4, true);
+
+    GameObject* objectSaw1 = (GameObject*)rayCollision1.node;
+    GameObject* objectSaw2 = (GameObject*)rayCollision1.node;
+    GameObject* objectSaw3 = (GameObject*)rayCollision1.node;
+    GameObject* objectSaw4 = (GameObject*)rayCollision1.node;
+
+    if ((objectSaw1 == bonus1 || objectSaw1 == bonus2 )
+        ||(objectSaw2 == bonus1 || objectSaw2 == bonus2)
+        || (objectSaw3 == bonus1 || objectSaw3 == bonus2)
+        || (objectSaw4 == bonus1 || objectSaw4 == bonus2))
+    {
+        enemySeeBonus = true;
+    }
+    
+}
+
 StateGameObject* TutorialGame::AddStateObjectToWorld(const Vector3& position)
 {
     auto apple = new StateGameObject();
-    float radius = 0.5f;
+    float radius = 3.0f;
     auto volume = new SphereVolume(radius);
-    apple->SetBoundingVolume((CollisionVolume*)volume);
+    apple->SetBoundingVolume(reinterpret_cast<CollisionVolume*>(volume));
     apple->GetTransform()
         .SetScale(Vector3(radius, radius, radius))
         .SetPosition(position);
 
-    apple->SetRenderObject(new RenderObject(&apple->GetTransform(), bonusMesh, nullptr, basicShader));
+    apple->SetRenderObject(new RenderObject(&apple->GetTransform(), sphereMesh, basicTex, basicShader));
     apple->SetPhysicsObject(new PhysicsObject(&apple->GetTransform(), apple->GetBoundingVolume()));
 
     apple->GetPhysicsObject()->SetInverseMass(1.0f);
@@ -473,6 +524,16 @@ void TutorialGame::DebugObjectMovement() {
 
         if (Window::GetKeyboard()->KeyDown(KeyboardKeys::NUM5)) {
             selectionObject->GetPhysicsObject()->AddForce(Vector3(0, -10, 0));
+        }
+        //if player is moving
+        if (Window::GetKeyboard()->KeyDown(KeyboardKeys::F3))
+        {
+            auto pos = selectionObject->GetTransform().GetPosition();
+            Debug::Print("Position: " +
+                std::to_string(pos.x) + " " +
+                std::to_string(pos.y) + " " +
+                std::to_string(pos.z),
+                Vector2(25, 10));
         }
     }
 
@@ -721,7 +782,8 @@ void TutorialGame::InitConstraintCubeAndRotatingSphere(const Vector3& cubePos, c
 void TutorialGame::InitTargetEnemyBall(const Vector3& position)
 {
     constexpr float sphereRadius = 3.0f;
-    enemyBall = AddSphereToWorld(position, sphereRadius, 100);
+    //enemyBall = AddSphereToWorld(position, sphereRadius, 100);
+    enemyBall = AddStateObjectToWorld(position);
     enemyBall->SetName("Sphere Emery");
     enemyBall->SetWorldID(201);
     endGameInfo.b = enemyBall;
@@ -729,8 +791,8 @@ void TutorialGame::InitTargetEnemyBall(const Vector3& position)
 
 void TutorialGame::InitBonus()
 {
-    bonus1 = AddBonusToWorld(Vector3(150, 0, 10));
-    bonus2 = AddBonusToWorld(Vector3(130, 0, 10));
+    bonus1 = AddBonusToWorld(Vector3(150, 0, 55));
+    bonus2 = AddBonusToWorld(Vector3(160, 0, 55));
 
     bonus1->SetWorldID(202);
     bonus2->SetWorldID(203);
